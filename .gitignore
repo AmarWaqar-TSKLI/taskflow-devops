@@ -1,0 +1,29 @@
+# Dependencies & build output
+node_modules/
+dist/
+coverage/
+*.tgz
+
+# Secrets — NEVER commit these
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+credentials
+.aws/
+
+# Load test output
+loadtest/results/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+*.swp
+
+# Big files that don't belong in git
+docs/submission/*.pdf
