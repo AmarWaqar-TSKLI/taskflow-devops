@@ -73,7 +73,7 @@ docker compose up --build
 
 | What | Link |
 |------|------|
-| GitHub repo | `https://github.com/<org>/<repo>` |
+| GitHub repo | https://github.com/AmarWaqar-TSKLI/taskflow-devops |
 | Live app (ALB URL) | `http://<alb-dns-name>` |
 | SonarCloud project | |
 | Snyk project | |

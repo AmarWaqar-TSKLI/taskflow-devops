@@ -233,7 +233,7 @@ sequenceDiagram
 **IAM roles (least privilege) — policy JSON lives in `infra/iam/`**
 | Role | Trusted by | Can do |
 |------|-----------|--------|
-| `taskflow-github-ci-role` | GitHub OIDC, `repo:<org>/<repo>:ref:refs/heads/main` only | ECR push to the two repos (`ecr:GetAuthorizationToken`, `BatchCheckLayerAvailability`, `InitiateLayerUpload`, `UploadLayerPart`, `CompleteLayerUpload`, `PutImage`, `BatchGetImage`) |
+| `taskflow-github-ci-role` | GitHub OIDC, `repo:AmarWaqar-TSKLI/taskflow-devops:ref:refs/heads/main` only | ECR push to the two repos (`ecr:GetAuthorizationToken`, `BatchCheckLayerAvailability`, `InitiateLayerUpload`, `UploadLayerPart`, `CompleteLayerUpload`, `PutImage`, `BatchGetImage`) |
 | `taskflow-github-deploy-role` | GitHub OIDC, main branch only | `ssm:GetParameter/PutParameter` on `/taskflow/prod/*`, `autoscaling:StartInstanceRefresh/DescribeInstanceRefreshes` on `taskflow-asg`, `ecr:DescribeImages` |
 | `taskflow-ec2-role` | `ec2.amazonaws.com` | ECR pull, `ssm:GetParameter` on `/taskflow/prod/*`, `secretsmanager:GetSecretValue` on `taskflow/prod/db`, CloudWatch logs/metrics (`CloudWatchAgentServerPolicy`), `AmazonSSMManagedInstanceCore` (Session Manager) |
 
