@@ -13,7 +13,7 @@ security around it.**
 | # | File | What it tells you | Time |
 |---|------|-------------------|------|
 | 1 | [docs/REQUIREMENTS.md](docs/REQUIREMENTS.md) | Everything the brief demands, as a checklist. **You never need to open the .docx.** | 10 min |
-| 2 | [docs/WORK.md](docs/WORK.md) | Who owns what (Member 1–5), your tasks, due dates, "done when" | 10 min |
+| 2 | [docs/WORK.md](docs/WORK.md) | Who owns what (Members 1–4), your tasks, due dates, "done when" | 10 min |
 | 3 | [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | How the system fits together + **the contracts** (ports, names, env vars) everyone must use | 15 min |
 | 4 | [CONTRIBUTING.md](CONTRIBUTING.md) | How we work: tests first, branches, PRs, reviews, secrets | 10 min |
 | 5 | [docs/PROGRESS.md](docs/PROGRESS.md) | The tracker. Tick **Built** and **Tested** as you go | — |
@@ -36,7 +36,7 @@ security around it.**
 ├── scripts/                   ← (Member 2) shell scripts: build-and-test, healthcheck, deploy, smoke-test
 ├── infra/                     ← (Member 4) AWS setup docs, IAM policies, user-data
 │   └── iam/                   ← JSON trust + permission policies for every role
-├── monitoring/                ← (Member 5) CloudWatch agent config, dashboard JSON, alarms
+├── monitoring/                ← (Member 1) CloudWatch agent config, dashboard JSON, alarms
 ├── loadtest/                  ← (Member 1) k6 load test
 ├── .github/
 │   ├── workflows/             ← pipeline.yml (stages 1–12), rollback.yml

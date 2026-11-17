@@ -12,11 +12,10 @@
 | Area | Owner | Done / total |
 |------|-------|--------------|
 | Member setup | Each member | 0 / 3 |
-| App & tests | M1 | 0 / 10 |
-| Containers, scripts, CD | M2 | 0 / 12 |
-| CI & DevSecOps | M3 | 0 / 14 |
-| AWS infra | M4 | 0 / 15 |
-| Observability & docs | M5 | 0 / 11 |
+| App, tests & monitoring | M1 | 0 / 14 |
+| Containers, scripts, CD & PDF | M2 | 0 / 15 |
+| CI, DevSecOps, diagram & report | M3 | 0 / 16 |
+| AWS infra & incident note | M4 | 0 / 16 |
 | Demos | Whole team | 0 / 7 |
 | Submission | Whole team | 0 / 12 |
 
@@ -26,13 +25,13 @@
 
 Tick your own initials when done.
 
-| ID | Task | M1 | M2 | M3 | M4 | M5 |
-|----|------|----|----|----|----|----|
-| T-01 | Your row in the Team table filled | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| T-02 | Tools installed | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
-| T-03 | Docs read | ⬜ | ⬜ | ⬜ | ⬜ | ⬜ |
+| ID | Task | M1 | M2 | M3 | M4 |
+|----|------|----|----|----|----|
+| T-01 | Your row in the Team table filled | ⬜ | ⬜ | ⬜ | ⬜ |
+| T-02 | Tools installed | ⬜ | ⬜ | ⬜ | ⬜ |
+| T-03 | Docs read | ⬜ | ⬜ | ⬜ | ⬜ |
 
-## Member 1 — Application, tests & load test
+## Member 1 — Application, tests, load test & monitoring
 
 | ID | Task | Due | Built | Tested | Proof |
 |----|------|-----|-------|--------|-------|
@@ -45,9 +44,13 @@ Tick your own initials when done.
 | M1-07 | JSON request logging | 22 Nov | ⬜ | ⬜ | |
 | M1-08 | `APP_VERSION` in health response | 22 Nov | ⬜ | ⬜ | |
 | M1-09 | k6 load test script + README | 25 Nov | ⬜ | ⬜ | |
-| M1-10 | App README section + lessons for report | 29 Nov | ⬜ | ⬜ | |
+| M1-10 | CloudWatch agent config (memory) | 23 Nov | ⬜ | ⬜ | |
+| M1-11 | SNS topic + all members subscribed | 23 Nov | ⬜ | ⬜ | |
+| M1-12 | Dashboard + `monitoring/dashboard.json` | 24 Nov | ⬜ | ⬜ | |
+| M1-13 | ≥ 2 alarms, each tested | 24 Nov | ⬜ | ⬜ | |
+| M1-14 | App README section + lessons for report | 29 Nov | ⬜ | ⬜ | |
 
-## Member 2 — Containers, shell scripts & CD
+## Member 2 — Containers, shell scripts, CD, README & PDF
 
 | ID | Task | Due | Built | Tested | Proof |
 |----|------|-----|-------|--------|-------|
@@ -63,8 +66,11 @@ Tick your own initials when done.
 | M2-10 | `scripts/deploy.sh` | 24 Nov | ⬜ | ⬜ | |
 | M2-11 | Job `12-deploy` + auto-rollback | 25 Nov | ⬜ | ⬜ | |
 | M2-12 | `rollback.yml` manual workflow | 26 Nov | ⬜ | ⬜ | |
+| M2-13 | Log groups + 7-day retention | 22 Nov | ⬜ | ⬜ | |
+| M2-14 | Root README final (run / deploy / teardown / links) | 29 Nov | ⬜ | ⬜ | |
+| M2-15 | `GroupX.pdf` assembled and submitted | 30 Nov | ⬜ | ⬜ | |
 
-## Member 3 — CI pipeline & DevSecOps
+## Member 3 — CI pipeline, DevSecOps, diagram & report
 
 | ID | Task | Due | Built | Tested | Proof |
 |----|------|-----|-------|--------|-------|
@@ -82,8 +88,10 @@ Tick your own initials when done.
 | M3-11 | `SECURITY.md` | 22 Nov | ⬜ | ⬜ | |
 | M3-12 | PR template (+ CODEOWNERS) | 18 Nov | ⬜ | ⬜ | |
 | M3-13 | `docs/VIVA.md` live-demo script, everyone rehearsed | 28 Nov | ⬜ | ⬜ | |
+| M3-14 | Architecture diagram (draft 20 Nov, final) | 28 Nov | ⬜ | ⬜ | |
+| M3-15 | Findings report + contribution table | 29 Nov | ⬜ | ⬜ | |
 
-## Member 4 — AWS infrastructure, IAM & networking
+## Member 4 — AWS infrastructure, IAM, networking & incident note
 
 | ID | Task | Due | Built | Tested | Proof |
 |----|------|-----|-------|--------|-------|
@@ -102,22 +110,8 @@ Tick your own initials when done.
 | M4-12 | Live link in README + `ALB_URL` variable | 23 Nov | ⬜ | ⬜ | |
 | M4-13 | `infra/README.md` complete (rebuild + teardown) | 28 Nov | ⬜ | ⬜ | |
 | M4-14 | Cost control, everything up until grading | ongoing | ⬜ | ⬜ | |
+| M4-15 | Post-incident note (after D-07) | 28 Nov | ⬜ | ⬜ | |
 
-## Member 5 — Observability, incident, diagram, report & PDF
-
-| ID | Task | Due | Built | Tested | Proof |
-|----|------|-----|-------|--------|-------|
-| M5-01 | Architecture diagram draft | 18 Nov | ⬜ | ⬜ | |
-| M5-02 | Log groups + retention (with M2) | 22 Nov | ⬜ | ⬜ | |
-| M5-03 | CloudWatch agent config (memory) | 23 Nov | ⬜ | ⬜ | |
-| M5-04 | SNS topic + all members subscribed | 23 Nov | ⬜ | ⬜ | |
-| M5-05 | Dashboard + `monitoring/dashboard.json` | 24 Nov | ⬜ | ⬜ | |
-| M5-06 | ≥ 2 alarms, each tested | 24 Nov | ⬜ | ⬜ | |
-| M5-07 | Post-incident note (after D-07) | 28 Nov | ⬜ | ⬜ | |
-| M5-08 | Final architecture diagram | 28 Nov | ⬜ | ⬜ | |
-| M5-09 | Findings report + contribution table | 29 Nov | ⬜ | ⬜ | |
-| M5-10 | README final (run / deploy / teardown / links) | 29 Nov | ⬜ | ⬜ | |
-| M5-11 | `GroupX.pdf` assembled and submitted | 30 Nov | ⬜ | ⬜ | |
 
 ## Demos & evidence — whole team together, Fri 27 / Sat 28 Nov
 
@@ -140,12 +134,12 @@ No owners: the team runs these together and rotates who drives (details in [WORK
 | F-01 | Every member has commits **and** PRs **and** reviews in the repo | All | ⬜ |
 | F-02 | Gitleaks over full history is clean | M3 | ⬜ |
 | F-03 | Every Dependabot/Snyk/Trivy/Sonar finding fixed or listed in `SECURITY.md` | M3 | ⬜ |
-| F-04 | README: run locally / deploy from scratch / tear down / branching strategy / network design | M5 + M4 | ⬜ |
+| F-04 | README: run locally / deploy from scratch / tear down / branching strategy / network design | M2 + M4 | ⬜ |
 | F-05 | Workflows, Dockerfiles, Compose, scripts, `SECURITY.md` all visible in repo | M3 | ⬜ |
 | F-06 | Instructor + TA can access the repo | All | ⬜ |
 | F-07 | Live link opens the app from a phone (not just our laptops) | M4 | ⬜ |
-| F-08 | All 10 screenshot groups present in `docs/evidence/` | M5 | ⬜ |
-| F-09 | PDF page 1 = all names + roll numbers | M5 | ⬜ |
-| F-10 | PDF links clickable, named `GroupX.pdf` | M5 | ⬜ |
+| F-08 | All 10 screenshot groups present in `docs/evidence/` | M2 | ⬜ |
+| F-09 | PDF page 1 = all names + roll numbers | M2 | ⬜ |
+| F-10 | PDF links clickable, named `GroupX.pdf` | M2 | ⬜ |
 | F-11 | Everyone rehearsed `docs/VIVA.md` once | All | ⬜ |
 | F-12 | AWS stack left running; budget alert still on | M4 | ⬜ |

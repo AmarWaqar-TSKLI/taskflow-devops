@@ -1,6 +1,6 @@
 # incidents — post-incident notes
 
-**Owner:** Member 5. One file per incident: `YYYY-MM-DD-<short-name>.md`. Copy the template below.
+**Owner:** Member 4. One file per incident: `YYYY-MM-DD-<short-name>.md`. Copy the template below.
 
 ```markdown
 # Incident: <title>

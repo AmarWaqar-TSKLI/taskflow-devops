@@ -19,4 +19,4 @@ Closes:
 - [ ] Docs updated if behaviour or setup changed
 
 ## Reviewer
-<!-- Default rotation: M1→M2, M2→M3, M3→M4, M4→M5, M5→M1 -->
+<!-- Default rotation: M1→M2, M2→M3, M3→M4, M4→M1 -->

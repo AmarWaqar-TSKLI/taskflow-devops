@@ -1,6 +1,6 @@
 # monitoring
 
-**Owner:** Member 5. What we watch and why: [docs/ARCHITECTURE.md §8](../docs/ARCHITECTURE.md#8-observability).
+**Owner:** Member 1. What we watch and why: [docs/ARCHITECTURE.md §8](../docs/ARCHITECTURE.md#8-observability).
 
 | File | What |
 |------|------|

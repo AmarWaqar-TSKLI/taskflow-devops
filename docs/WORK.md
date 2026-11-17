@@ -1,4 +1,4 @@
-# Work division — Members 1 to 5
+# Work division — Members 1 to 4
 
 Each member **owns** an area end-to-end (builds it, tests it, documents it, takes its screenshots, and can
 explain it in the viva). Owning doesn't mean working alone. Pair up whenever a task says "with Mx".
@@ -9,11 +9,10 @@ Task IDs here match [PROGRESS.md](PROGRESS.md) and go in your branch names and c
 
 | Member | Name | Roll no. | GitHub | Area |
 |--------|------|----------|--------|------|
-| **M1** | | | @ | Application & tests & load test |
-| **M2** | | | @ | Containers, shell scripts, CD (deploy + rollback) |
-| **M3** | | | @ | CI pipeline & DevSecOps |
-| **M4** | | | @ | AWS infrastructure, IAM & networking |
-| **M5** | | | @ | Observability, incident, diagram, report & final PDF |
+| **M1** | | | @ | Application, tests, load test & monitoring |
+| **M2** | | | @ | Containers, shell scripts, CD, final README & PDF |
+| **M3** | | | @ | CI pipeline, DevSecOps, architecture diagram & report |
+| **M4** | | | @ | AWS infrastructure, IAM, networking & incident note |
 
 Group number (for `GroupX.pdf`): **____**
 
@@ -32,7 +31,7 @@ Group number (for `GroupX.pdf`): **____**
 ```
 M1 app ──► M2 Dockerfiles ──► M3 jobs 5, 9, 10      M4 VPC/IAM/ECR/RDS ──► M2 jobs 11–12
    │                              │                       │
-   └── JSON request logs ──► M5 dashboard/alarms ◄── M4 ALB/ASG
+   └── JSON request logs ──► M1 dashboard/alarms ◄── M4 ALB/ASG
 ```
 
 - The **critical path** is **M4 → M2 (CD)**. If M4 slips, CD slips, and so do all the demos. Others should help M4 first.
@@ -54,8 +53,11 @@ Each person does these for themselves.
 
 ## Member 1 — Application, tests & load test
 
-**Owns:** `services/backend/`, `services/frontend/` (code, not Dockerfiles), `loadtest/`.
-**Viva focus:** the app, tests and coverage, TDD, the load test.
+**Owns:** `services/backend/`, `services/frontend/` (code, not Dockerfiles), `loadtest/`, `monitoring/`
+(CloudWatch agent config, SNS, dashboard, alarms).
+**Viva focus:** the app, tests and coverage, TDD, the load test, what each metric and alarm means.
+
+The app is small, so it's done by Sun 22. Monitoring starts once the ALB/ASG are up (Mon 23).
 
 | ID | Task | Due | Done when |
 |----|------|-----|-----------|
@@ -65,16 +67,21 @@ Each person does these for themselves.
 | M1-04 | Postgres repository with `pg`, config from env vars (contract §3.3), `CREATE TABLE IF NOT EXISTS` on startup | Fri 20 | Works against Compose `db` |
 | M1-05 | Frontend UI: list / add / toggle / delete tasks via relative `/api/...`; tests for the API client + rendering | Sat 21 | Works at `localhost:8080` in Compose |
 | M1-06 | Coverage ≥ 80% enforced via `coverageThreshold`; `lcov` output at `coverage/lcov.info` for Sonar | Sat 21 | CI fails if coverage drops |
-| M1-07 | JSON request logging middleware (`method, path, status, duration_ms`) — feeds M5's logs | Sun 22 | Log lines visible in `docker compose logs backend` |
+| M1-07 | JSON request logging middleware (`method, path, status, duration_ms`) — feeds the CloudWatch logs and dashboard | Sun 22 | Log lines visible in `docker compose logs backend` |
 | M1-08 | `APP_VERSION` in health response (so we can *see* which version is live) | Sun 22 | Health shows version on AWS |
 | M1-09 | `loadtest/load.js` k6 script: ramp up to drive CPU > target, hold, ramp down. `loadtest/README.md` how to run | Wed 25 | Script runs against ALB |
-| M1-10 | Help M5: app section of README + lessons learned for the report | Sun 29 | Text handed to M5 |
+| M1-10 | `monitoring/cloudwatch-agent.json` for memory (`mem_used_percent`) + disk, by ASG name; installed via user-data (with M4) | Mon 23 | Memory metric visible in CloudWatch |
+| M1-11 | SNS topic `taskflow-alerts`, email subscriptions for all members (everyone confirms) | Mon 23 | Test message received by all |
+| M1-12 | Dashboard `taskflow-dashboard`: request rate, 5xx errors, latency p50/p95/p99, healthy hosts, CPU, memory. Export to `monitoring/dashboard.json` | Tue 24 | Screenshot |
+| M1-13 | Alarms (ARCHITECTURE §8): unhealthy hosts, backend 5xx, optional CPU. Definitions in `monitoring/alarms.md` | Tue 24 | Each alarm triggered once, SNS email received |
+| M1-14 | App section of README + lessons learned for the report (hand to M3) | Sun 29 | Text handed over |
 
 ## Member 2 — Containers, shell scripts & CD
 
 **Owns:** both `Dockerfile`s + `.dockerignore`s, `docker-compose.yml`, `docker-compose.prod.yml`, `scripts/`,
-jobs `11-push-image` + `12-deploy` in `pipeline.yml`, `rollback.yml`, ECR repos.
-**Viva focus:** Docker best practices, compose, how a merge becomes a running container, rollback.
+jobs `11-push-image` + `12-deploy` in `pipeline.yml`, `rollback.yml`, ECR repos, CloudWatch log groups,
+the final root README, and assembling `GroupX.pdf`.
+**Viva focus:** Docker best practices, compose, how a merge becomes a running container, rollback, logging.
 
 | ID | Task | Due | Done when |
 |----|------|-----|-----------|
@@ -90,12 +97,15 @@ jobs `11-push-image` + `12-deploy` in `pipeline.yml`, `rollback.yml`, ECR repos.
 | M2-10 | `scripts/deploy.sh <tag>`: save previous tag, set `/taskflow/prod/image_tag`, start instance refresh, wait until done | Tue 24 | ShellCheck clean; refresh completes |
 | M2-11 | Job `12-deploy`: OIDC → deploy role → `deploy.sh` → `smoke-test.sh $ALB_URL` → on failure `deploy.sh <previous>` and fail the job | Wed 25 | A bad build is rolled back automatically |
 | M2-12 | `.github/workflows/rollback.yml`: `workflow_dispatch` input `image_tag`, verify tag exists in ECR, deploy + smoke test | Thu 26 | Rolled back to an older tag successfully |
+| M2-13 | Log groups `/taskflow/frontend`, `/taskflow/backend`, 7-day retention, matching the `awslogs` driver in `docker-compose.prod.yml` | Sun 22 | Logs from EC2 visible in CloudWatch |
+| M2-14 | Root README final: run locally, deploy from scratch + teardown (from M4's `infra/README.md`), links table filled | Sun 29 | Every link clickable |
+| M2-15 | Assemble `GroupX.pdf` (cover page with names + roll nos., diagram, proof + screenshots, live link, report). Final link check | Mon 30 AM | **Submitted** |
 
 ## Member 3 — CI pipeline & DevSecOps
 
 **Owns:** `.github/workflows/pipeline.yml` jobs 2–10, branch protection, SonarCloud, Snyk, Dependabot,
-`SECURITY.md`, PR template, the viva walkthrough.
-**Viva focus:** every pipeline stage, why each tool exists, how a vulnerable change gets blocked.
+`SECURITY.md`, PR template, the viva walkthrough, the architecture diagram and the findings report.
+**Viva focus:** every pipeline stage, why each tool exists, how a vulnerable change gets blocked, the diagram.
 
 | ID | Task | Due | Done when |
 |----|------|-----|-----------|
@@ -113,11 +123,14 @@ jobs `11-push-image` + `12-deploy` in `pipeline.yml`, `rollback.yml`, ECR repos.
 | M3-11 | `SECURITY.md`: tools + thresholds per stage, how secrets are handled, table of accepted findings with reasons, how to report | Sun 22 (keep updated) | Linked from README |
 | M3-12 | `.github/pull_request_template.md` review checklist (already scaffolded — adjust if needed) + optional `CODEOWNERS` | Wed 18 | Template appears on new PRs |
 | M3-13 | `docs/VIVA.md`: step-by-step script any member can follow live to push a change and show a security stage blocking it | Sat 28 | Every member has rehearsed it once |
+| M3-14 | Architecture diagram (draw.io / Excalidraw): draft by Fri 20, final meets every point in REQUIREMENTS "Part 1" → `docs/submission/architecture.png` | Sat 28 | Reviewed by M4 |
+| M3-15 | One-page findings report + contribution table (`docs/submission/report.md`), input from everyone | Sun 29 | Everyone approved their row |
 
 ## Member 4 — AWS infrastructure, IAM & networking
 
-**Owns:** everything in the AWS account except monitoring, `infra/` (README, `iam/*.json`, `user-data.sh`).
-**Viva focus:** VPC design, security groups, IAM/OIDC, ASG + ALB, how instances boot.
+**Owns:** everything in the AWS account except CloudWatch monitoring (M1) and ECR/log groups (M2), `infra/`
+(README, `iam/*.json`, `user-data.sh`), `docs/incidents/`.
+**Viva focus:** VPC design, security groups, IAM/OIDC, ASG + ALB, how instances boot, the incident.
 
 > Document every setting in `infra/README.md` **as you create it** (values + why). Rebuilding from the
 > README must be possible — that's a graded requirement.
@@ -139,26 +152,7 @@ jobs `11-push-image` + `12-deploy` in `pipeline.yml`, `rollback.yml`, ECR repos.
 | M4-12 | Live link working: put ALB URL in README + GitHub variable `ALB_URL` | Mon 23 | URL opens the app |
 | M4-13 | `infra/README.md` complete: every setting, rebuild from scratch, **teardown order**, cost notes | Sat 28 | A teammate could rebuild from it |
 | M4-14 | Cost control: scale down overnight while testing, **restore before demos and keep everything up until grading** | ongoing | Budget not exceeded |
-
-## Member 5 — Observability, incident, diagram, report & PDF
-
-**Owns:** `monitoring/`, CloudWatch (logs, dashboard, alarms, SNS), `docs/incidents/`, `docs/submission/`,
-final README polish, and assembling `GroupX.pdf`.
-**Viva focus:** what each metric/alarm means, how the incident was diagnosed, the architecture diagram.
-
-| ID | Task | Due | Done when |
-|----|------|-----|-----------|
-| M5-01 | Start the architecture diagram now (draw.io / Excalidraw), keep updating as things get built | Wed 18 (draft) | Draft shared |
-| M5-02 | Log groups `/taskflow/frontend`, `/taskflow/backend`, 7-day retention (with M2 for the `awslogs` driver) | Sun 22 | Logs from EC2 visible |
-| M5-03 | `monitoring/cloudwatch-agent.json` for memory (`mem_used_percent`) + disk, by ASG name; installed via user-data (with M4) | Mon 23 | Memory metric visible |
-| M5-04 | SNS topic `taskflow-alerts`, email subscriptions for all members (everyone confirms) | Mon 23 | Test message received |
-| M5-05 | Dashboard `taskflow-dashboard`: request rate, 5xx errors, latency p50/p95/p99, healthy hosts, CPU, memory. Export to `monitoring/dashboard.json` | Tue 24 | Screenshot |
-| M5-06 | Alarms (contract §8): unhealthy hosts, backend 5xx, optional CPU. Export definitions to `monitoring/alarms.md` | Tue 24 | Each alarm tested once |
-| M5-07 | Write the post-incident note after the team runs D-07: `docs/incidents/2026-11-27-<name>.md` (template in that folder) | Sat 28 | Written |
-| M5-08 | Final architecture diagram meeting every point in REQUIREMENTS "Part 1" → `docs/submission/architecture.png` | Sat 28 | Reviewed by M4 |
-| M5-09 | One-page findings report + contribution table (`docs/submission/report.md`), input from everyone | Sun 29 | Everyone approved their row |
-| M5-10 | README final: run locally (from M2), deploy from scratch + teardown (from M4), links table filled | Sun 29 | Links clickable |
-| M5-11 | Assemble `GroupX.pdf` (cover page with names + roll nos., diagram, proof + screenshots, live link, report). Final link check | Mon 30 AM | **Submitted** |
+| M4-15 | Post-incident note after the team runs D-07: `docs/incidents/2026-11-27-<name>.md` (template in that folder) | Sat 28 | Written |
 
 ---
 

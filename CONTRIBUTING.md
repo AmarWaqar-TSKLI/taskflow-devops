@@ -1,6 +1,6 @@
 # Contributing — how we work
 
-Read this once, fully. These rules exist so five people can work in parallel for two weeks without breaking
+Read this once, fully. These rules exist so four people can work in parallel for two weeks without breaking
 each other's stuff or losing marks.
 
 ## The 10 rules
@@ -62,8 +62,7 @@ Types: `feat`, `fix`, `test`, `docs`, `ci`, `build`, `refactor`, `chore`.
 | Member 1 | Member 2 |
 | Member 2 | Member 3 |
 | Member 3 | Member 4 |
-| Member 4 | Member 5 |
-| Member 5 | Member 1 |
+| Member 4 | Member 1 |
 
 ## Tests first (TDD)
 

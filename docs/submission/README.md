@@ -1,6 +1,6 @@
 # submission — the final PDF
 
-**Owner:** Member 5. Final file: `GroupX.pdf` (git-ignored; upload it, don't commit it).
+**Owner:** Member 2 (PDF) · Member 3 (diagram + report). Final file: `GroupX.pdf` (git-ignored; upload it, don't commit it).
 
 ## PDF structure
 1. **Cover page:** project name, group number, **all members with roll numbers**, GitHub link, live link (clickable)
@@ -21,4 +21,3 @@
 | M2 | | | |
 | M3 | | | |
 | M4 | | | |
-| M5 | | | |

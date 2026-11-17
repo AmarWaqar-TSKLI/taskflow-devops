@@ -36,7 +36,7 @@ User-data: [`user-data.sh`](user-data.sh)
 
 ## 10. ECR (M2-07)
 
-## 11. CloudWatch, SNS (M5)
+## 11. CloudWatch, SNS (M1 dashboard/alarms/SNS, M2 log groups)
 
 ## Deploy from scratch — order
 1. VPC → subnets → IGW → NAT → route tables

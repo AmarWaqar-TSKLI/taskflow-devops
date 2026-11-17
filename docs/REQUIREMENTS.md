@@ -4,7 +4,7 @@ This is a faithful rewrite of [brief/project-brief.docx](brief/project-brief.doc
 item is mandatory.** If something here and the .docx ever disagree, the .docx wins — tell the team.
 
 - **Deadline:** Monday 30 November 2026 (the "4 weeks" in the brief does not apply to us).
-- **Group:** 3–5 students (we are 5). One submission per group.
+- **Group:** 3–5 students (we are 4). One submission per group.
 - **Theme:** our choice and kept small. Ours: **TaskFlow, a task tracker**.
 - Graded on: automation, collaboration, security, observability, high availability, scalability.
 - Marks can differ per member, based on the **contribution table** and the **viva**.
