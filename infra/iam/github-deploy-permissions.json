@@ -1,0 +1,41 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ImageTagParameters",
+      "Effect": "Allow",
+      "Action": [
+        "ssm:GetParameter",
+        "ssm:PutParameter"
+      ],
+      "Resource": "arn:aws:ssm:us-east-1:{{ACCOUNT_ID}}:parameter/taskflow/prod/*"
+    },
+    {
+      "Sid": "RefreshTaskflowAsg",
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:StartInstanceRefresh",
+        "autoscaling:CancelInstanceRefresh"
+      ],
+      "Resource": "arn:aws:autoscaling:us-east-1:{{ACCOUNT_ID}}:autoScalingGroup:*:autoScalingGroupName/taskflow-asg"
+    },
+    {
+      "Sid": "DescribeOnlyNoResourceLevelSupport",
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:DescribeInstanceRefreshes",
+        "autoscaling:DescribeAutoScalingGroups"
+      ],
+      "Resource": "*"
+    },
+    {
+      "Sid": "CheckTagExistsForRollback",
+      "Effect": "Allow",
+      "Action": "ecr:DescribeImages",
+      "Resource": [
+        "arn:aws:ecr:us-east-1:{{ACCOUNT_ID}}:repository/taskflow-frontend",
+        "arn:aws:ecr:us-east-1:{{ACCOUNT_ID}}:repository/taskflow-backend"
+      ]
+    }
+  ]
+}
