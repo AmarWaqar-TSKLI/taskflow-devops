@@ -1,0 +1,30 @@
+# M4-03 proof: GitHub Actions can assume both AWS roles through OIDC, with no access keys.
+# Run it manually (Actions -> AWS OIDC check -> Run workflow).
+#   from main         -> both jobs green, printing the assumed-role ARN
+#   from any branch   -> both jobs fail at "assume role": the trust policy only allows refs/heads/main
+name: AWS OIDC check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write # lets the job request a GitHub OIDC token
+  contents: read
+
+jobs:
+  assume-role:
+    strategy:
+      fail-fast: false
+      matrix:
+        role: [taskflow-github-ci-role, taskflow-github-deploy-role]
+    name: assume ${{ matrix.role }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assume role via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/${{ matrix.role }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Who am I
+        run: aws sts get-caller-identity

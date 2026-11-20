@@ -3,8 +3,10 @@
 #   PowerUserAccess     build/operate everything except IAM (ECR, CloudWatch, SNS, EC2, RDS, ...)
 #   IAMReadOnlyAccess   see roles and trust policies (viva, screenshots), change nothing
 #   IAMUserChangePassword + iam/team-self-mfa.json   set own password and own MFA device
-# No access keys are created: console only. Console passwords are set by Member 4 in the
-# IAM console (Users -> <name> -> Security credentials -> Enable console access), never in git or chat.
+# No access keys are created: console only. Console access is enabled separately with a one-time
+# password and "must reset at next sign-in"
+# (aws iam create-login-profile --user-name <u> --password <temp> --password-reset-required).
+# Temporary passwords go to each member privately, never into git.
 # Safe to re-run.
 set -euo pipefail
 # shellcheck source-path=SCRIPTDIR
@@ -15,6 +17,12 @@ GROUP="taskflow-team"
 USERS=(hussain haseeb shuja)
 
 require_aws
+
+# Account password policy: applies to every console user.
+aws iam update-account-password-policy --minimum-password-length 12 \
+  --require-uppercase-characters --require-lowercase-characters --require-numbers --require-symbols \
+  --allow-users-to-change-password --password-reuse-prevention 3
+log "Password policy: min 12 chars, upper + lower + number + symbol, no reuse of last 3"
 
 if ! aws iam get-group --group-name "$GROUP" >/dev/null 2>&1; then
   log "Creating group $GROUP"
@@ -42,7 +50,6 @@ cat <<EOF
 
 Users in $GROUP: ${USERS[*]}
 Sign-in URL: https://$ACCOUNT_ID.signin.aws.amazon.com/console
-Next (Member 4, in the console): enable console access for each user with an auto-generated
-password + "must reset at next sign-in", and send it to them privately.
+Console access: create-login-profile with a one-time password + --password-reset-required.
 Each member then: sign in, set a new password, add an MFA device (top-right menu -> Security credentials).
 EOF

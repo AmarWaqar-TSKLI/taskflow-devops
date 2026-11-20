@@ -81,3 +81,9 @@ DB_MAJOR="17"
 # SSM parameters read by user-data and written by the deploy job
 PARAM_IMAGE_TAG="/taskflow/prod/image_tag"
 PARAM_PREVIOUS_TAG="/taskflow/prod/previous_image_tag"
+
+# Compute
+LT_NAME="taskflow-lt"
+INSTANCE_TYPE="t3.micro"
+AMI_PARAM="/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
+PARAM_COMPOSE="/taskflow/prod/compose_file"
