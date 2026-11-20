@@ -15,7 +15,7 @@
 | App, tests & monitoring | M1 | 0 / 14 |
 | Containers, scripts, CD & PDF | M2 | 0 / 15 |
 | CI, DevSecOps, diagram & report | M3 | 0 / 16 |
-| AWS infra & incident note | M4 | 6 / 16 |
+| AWS infra & incident note | M4 | 8 / 16 |
 | Demos | Whole team | 0 / 7 |
 | Submission | Whole team | 0 / 12 |
 
@@ -104,10 +104,10 @@ Tick your own initials when done.
 | M4-06 | SSM parameters for image tags | 21 Nov | ✅ | ✅ | `04-ssm-params.sh`; both params exist (`none`) |
 | M4-07 | `infra/user-data.sh` (with M2) | 22 Nov | ✅ | ⬜ | Host setup, secret, RDS reachability tested on a test instance (infra/README §7); 🚧 full `compose up` once M2 images + compose.prod exist |
 | M4-08 | Launch template (IMDSv2, no key pair) | 22 Nov | ✅ | ✅ | `05-launch-template.sh`; test instance: no key, no public IP, IMDSv2 required |
-| M4-09 | ALB + 2 target groups + path routing | 23 Nov | ⬜ | ⬜ | |
-| M4-10 | ASG (min 2, 2 AZs, target tracking) | 23 Nov | ⬜ | ⬜ | |
-| M4-11 | SSM Session Manager works, SSH impossible | 23 Nov | ⬜ | ⬜ | |
-| M4-12 | Live link in README + `ALB_URL` variable | 23 Nov | ⬜ | ⬜ | |
+| M4-09 | ALB + 2 target groups + path routing | 23 Nov | ✅ | ✅ | `06-target-groups.sh`, `alb.sh`; `/`→frontend, `/api/*`→backend, both TGs healthy (infra/README §8–9) |
+| M4-10 | ASG (min 2, 2 AZs, target tracking) | 23 Nov | ✅ | ✅ | `asg.sh`; 2 InService in 1a + 1b; instance-kill recovery ~1m50s (infra/README §9) |
+| M4-11 | SSM Session Manager works, SSH impossible | 23 Nov | ✅ | ⬜ | SSM Online, no key/no :22; 🚧 console screenshot of a session |
+| M4-12 | Live link in README + `ALB_URL` variable | 23 Nov | ⬜ | ⬜ | `alb.sh up` sets `ALB_URL` automatically; 🚧 final link once the real app is deployed |
 | M4-13 | `infra/README.md` complete (rebuild + teardown) | 28 Nov | ⬜ | ⬜ | |
 | M4-14 | Cost control, everything up until grading | ongoing | ⬜ | ⬜ | |
 | M4-15 | Post-incident note (after D-07) | 28 Nov | ⬜ | ⬜ | |

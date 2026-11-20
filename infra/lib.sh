@@ -87,3 +87,19 @@ LT_NAME="taskflow-lt"
 INSTANCE_TYPE="t3.micro"
 AMI_PARAM="/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64"
 PARAM_COMPOSE="/taskflow/prod/compose_file"
+
+# Load balancing + scaling
+TG_FRONTEND="taskflow-tg-frontend"
+TG_BACKEND="taskflow-tg-backend"
+ALB_NAME="taskflow-alb"
+ASG_NAME="taskflow-asg"
+ASG_MIN=2
+ASG_DESIRED=2
+ASG_MAX=4
+CPU_TARGET=50
+
+# Prints the ARN of a target group by name, or nothing.
+find_tg_arn() {
+  q aws elbv2 describe-target-groups --names "$1" \
+    --query 'TargetGroups[0].TargetGroupArn' --output text 2>/dev/null || true
+}
