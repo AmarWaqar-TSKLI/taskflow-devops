@@ -15,6 +15,7 @@ All of them pass ShellCheck and use `set -euo pipefail`.
 ```bash
 export AWS_PROFILE=<admin profile>   # a human admin on a laptop. CI never uses keys, only OIDC roles
 infra/00-budget.sh                   # needs BUDGET_EMAILS=a@x,b@y (not stored in git)
+infra/00-team-users.sh               # IAM users + group for teammates
 infra/01-network.sh                  # VPC, subnets, IGW, route tables       (free, stays up)
 infra/02-security-groups.sh          # alb-sg, app-sg, db-sg                  (free, stays up)
 infra/03-iam.sh                      # OIDC provider + 3 roles + profile      (free, stays up)
@@ -37,7 +38,7 @@ deployment until grading is complete."* and the live link must work at grading t
 | Account | `627551519533`, Free plan | Usage is paid from Free-plan credits |
 | Region | `us-east-1` | Contract §3.1; cheapest, every service available |
 | Budget | `taskflow-monthly`, $25/month, credits **excluded** | Alerts at 50 % / 80 % actual and 100 % forecast. Credits are excluded so it tracks real usage (credit burn) instead of always showing $0 |
-| Team access | IAM users per member, MFA | No shared logins, no access keys for teammates |
+| Team access | `00-team-users.sh`: users `hussain`, `haseeb`, `shuja` in group `taskflow-team` (PowerUserAccess + IAMReadOnlyAccess + change own password + manage own MFA, policy [`iam/team-self-mfa.json`](iam/team-self-mfa.json)). Console sign-in: `https://627551519533.signin.aws.amazon.com/console` | Own login per person, so CloudTrail shows who did what. PowerUser lets M1/M2 build CloudWatch, SNS and ECR without being able to change IAM. **No access keys**, console only; passwords are set in the console and sent privately |
 
 ## 1. VPC & subnets (M4-01): `01-network.sh`
 | Resource | Name | ID | Value | Why |
