@@ -9,10 +9,10 @@ Task IDs here match [PROGRESS.md](PROGRESS.md) and go in your branch names and c
 
 | Member | Name | Roll no. | GitHub | Area |
 |--------|------|----------|--------|------|
-| **M1** | | | @ | Application, tests, load test & monitoring |
-| **M2** | | | @ | Containers, shell scripts, CD, final README & PDF |
-| **M3** | | | @ | CI pipeline, DevSecOps, architecture diagram & report |
-| **M4** | | | @ | AWS infrastructure, IAM, networking & incident note |
+| **M1** | Haseeb | | @Haseebahmad22 | Application, tests, load test & monitoring |
+| **M2** | Hussain | | @hussainwaz | Containers, shell scripts, CD, final README & PDF |
+| **M3** | Shuja | | @slider79 | CI pipeline, DevSecOps, architecture diagram & report |
+| **M4** | Amar | | @AmarWaqar-TSKLI | AWS infrastructure, IAM, networking & incident note |
 
 Group number (for `GroupX.pdf`): **____**
 
@@ -151,7 +151,7 @@ the final root README, and assembling `GroupX.pdf`.
 | M4-11 | Verify SSM Session Manager into an instance; confirm SSH impossible | Mon 23 | Screenshot |
 | M4-12 | Live link working: put ALB URL in README + GitHub variable `ALB_URL` | Mon 23 | URL opens the app |
 | M4-13 | `infra/README.md` complete: every setting, rebuild from scratch, **teardown order**, cost notes | Sat 28 | A teammate could rebuild from it |
-| M4-14 | Cost control: scale down overnight while testing, **restore before demos and keep everything up until grading** | ongoing | Budget not exceeded |
+| M4-14 | Cost control: free layer stays up; paid layer (NAT, ALB, ASG, RDS) scaled down/removed between work sessions while building. **From submission until grading is complete: everything up, live link working, nothing deleted** (brief) | ongoing | Budget not exceeded; live link works at grading |
 | M4-15 | Post-incident note after the team runs D-07: `docs/incidents/2026-11-27-<name>.md` (template in that folder) | Sat 28 | Written |
 
 ---
