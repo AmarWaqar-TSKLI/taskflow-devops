@@ -1,0 +1,89 @@
+# Pipeline stage 12 (M2-11) and the deploy half of rollback.yml (M2-12).
+# Rolls the ASG onto image-tag with scripts/deploy.sh, then runs scripts/smoke-test.sh against the
+# ALB. If either fails, it deploys the tag that was live before and the job still ends FAILED.
+# Reusable: pipeline.yml calls it from the job named "12-deploy":
+#
+#   deploy:
+#     name: 12-deploy
+#     needs: push-image
+#     permissions: { contents: read, id-token: write }
+#     uses: ./.github/workflows/deploy.yml
+#     with:
+#       image-tag: ${{ needs.push-image.outputs.image-tag }}
+name: deploy
+
+on:
+  workflow_call:
+    inputs:
+      image-tag:
+        description: Tag to deploy, e.g. v1.0.42
+        type: string
+        required: true
+      auto-rollback:
+        description: Redeploy the previously live tag if the deploy or smoke test fails
+        type: boolean
+        default: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: deploy ${{ inputs.image-tag }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    # One deploy at a time (pipeline and manual rollback share this group); never cancel one midway.
+    concurrency:
+      group: taskflow-prod-deploy
+      cancel-in-progress: false
+    env:
+      IMAGE_TAG: ${{ inputs.image-tag }}
+      ALB_URL: ${{ vars.ALB_URL }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check settings
+        run: |
+          [[ -n "$ALB_URL" ]] || { echo "::error::GitHub variable ALB_URL is not set (infra/alb.sh up sets it)"; exit 1; }
+          echo "Deploying $IMAGE_TAG, smoke test against $ALB_URL"
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/taskflow-github-deploy-role
+          aws-region: ${{ vars.AWS_REGION }}
+          role-duration-seconds: 3600
+
+      - name: Deploy (SSM tag + instance refresh)
+        id: deploy
+        run: scripts/deploy.sh "$IMAGE_TAG"
+
+      - name: Smoke test
+        run: EXPECT_VERSION="$IMAGE_TAG" scripts/smoke-test.sh "$ALB_URL"
+
+      - name: Auto-rollback
+        id: rollback
+        if: >-
+          failure() && inputs.auto-rollback && steps.deploy.outputs.previous_tag != ''
+          && steps.deploy.outputs.previous_tag != 'none' && steps.deploy.outputs.previous_tag != inputs.image-tag
+        env:
+          PREVIOUS_TAG: ${{ steps.deploy.outputs.previous_tag }}
+        run: |
+          echo "::error::$IMAGE_TAG failed, rolling back to $PREVIOUS_TAG"
+          scripts/deploy.sh --keep-previous "$PREVIOUS_TAG"
+          EXPECT_VERSION="$PREVIOUS_TAG" scripts/smoke-test.sh "$ALB_URL"
+
+      - name: Summary
+        if: always()
+        env:
+          PREVIOUS_TAG: ${{ steps.deploy.outputs.previous_tag }}
+          ROLLBACK: ${{ steps.rollback.outcome }}
+        run: |
+          {
+            echo "### Deploy $IMAGE_TAG: ${{ job.status }}"
+            echo "- Live before: \`${PREVIOUS_TAG:-unknown}\` · App: $ALB_URL"
+            case "$ROLLBACK" in
+              success) echo "- **Rolled back to \`$PREVIOUS_TAG\`** (smoke test passed on it)" ;;
+              failure) echo "- **Rollback to \`$PREVIOUS_TAG\` FAILED: check the ASG and \`/api/health\` now**" ;;
+            esac
+          } >> "$GITHUB_STEP_SUMMARY"
