@@ -53,7 +53,11 @@ describe("JSON request logging middleware", () => {
     const logSpy = jest.spyOn(console, "log").mockImplementation(() => {});
     const middleware = createRequestLogger();
     let finishCb;
-    const req = { method: "GET", originalUrl: "/api/health", url: "/api/health" };
+    const req = {
+      method: "GET",
+      originalUrl: "/api/health",
+      url: "/api/health",
+    };
     const res = {
       statusCode: 200,
       on: (event, cb) => {
