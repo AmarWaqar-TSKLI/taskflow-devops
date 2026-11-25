@@ -1,6 +1,9 @@
 # Manual rollback (M2-12): Actions -> Rollback -> Run workflow on main -> image tag, e.g. v1.0.40.
 # Checks the tag exists in both ECR repos, then runs the same deploy + smoke test as stage 12.
 # If the smoke test fails on the old tag too, it puts back what was live and the run fails.
+# Notes: it uses docker-compose.prod.yml and scripts from main, with the old images. Don't start it
+# while a pipeline deploy is queued: deploys share one concurrency group and GitHub keeps only one
+# pending run per group, so the newer one cancels the waiting one.
 name: Rollback
 
 on:

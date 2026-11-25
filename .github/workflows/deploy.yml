@@ -61,6 +61,17 @@ jobs:
       - name: Smoke test
         run: EXPECT_VERSION="$IMAGE_TAG" scripts/smoke-test.sh "$ALB_URL"
 
+      # Fresh 1 h session: a slow or timed-out refresh above must not leave the rollback with expired credentials.
+      - name: Re-assume deploy role for rollback
+        if: >-
+          failure() && inputs.auto-rollback && steps.deploy.outputs.previous_tag != ''
+          && steps.deploy.outputs.previous_tag != 'none' && steps.deploy.outputs.previous_tag != inputs.image-tag
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/taskflow-github-deploy-role
+          aws-region: ${{ vars.AWS_REGION }}
+          role-duration-seconds: 3600
+
       - name: Auto-rollback
         id: rollback
         if: >-
