@@ -21,8 +21,13 @@ infra/02-security-groups.sh          # alb-sg, app-sg, db-sg                  (f
 infra/03-iam.sh                      # OIDC provider + 3 roles + profile      (free, stays up)
 infra/04-ssm-params.sh               # image tag parameters                   (free, stays up)
 infra/05-launch-template.sh          # taskflow-lt + user-data.sh             (free)
+infra/06-target-groups.sh            # 2 target groups + health checks        (free)
 infra/nat.sh up|down|status          # NAT gateway                            (paid, on demand)
 infra/rds.sh up|down|status          # RDS Postgres + secret                  (paid, on demand)
+infra/alb.sh up|down|status          # ALB + listener + /api/* rule           (paid, on demand)
+infra/asg.sh up|down|status          # ASG min 2, CPU 50 % target tracking    (paid, on demand)
+infra/up.sh | infra/down.sh          # whole paid layer in one go
+infra/teardown.sh                    # delete everything (after grading only)
 ```
 
 ### Cost model: free layer always up, paid layer scaled down until submission
@@ -139,32 +144,84 @@ works without SSH) · user-data finished, Docker + Compose v2.32.4 installed · 
 5432 (app-sg → db-sg) · reads the DB secret, `backend.env` built with all 5 keys at mode 600 · an
 attempt to *write* `/taskflow/prod/image_tag` from the instance is denied (role is read-only).
 
-## 8. Load balancer & target groups (M4-09)
+## 8. Load balancer & target groups (M4-09): `06-target-groups.sh`, `alb.sh up|down|status`
+| Setting | Value | Why |
+|---------|-------|-----|
+| ALB | `taskflow-alb`, internet-facing, IPv4, public-a + public-b, SG `taskflow-alb-sg` | Only public entry point; spans 2 AZs |
+| Listener | HTTP :80, default → `taskflow-tg-frontend` | Static UI and `/health` |
+| Rule (priority 10) | path `/api/*` → `taskflow-tg-backend` | Browser always calls relative `/api/...`, so one origin, no CORS |
+| `taskflow-tg-frontend` | HTTP 8080, health `GET /health` → 200 | Frontend container's health endpoint |
+| `taskflow-tg-backend` | HTTP 3000, health `GET /api/health` → 200 | Liveness only, never touches the DB (contract §3.2) |
+| Health check | every 10 s, timeout 5 s, healthy after 2, unhealthy after 2 | A dead instance leaves rotation within ~20 s |
+| Deregistration delay | 30 s (default 300) | Rolling deploys and scale-in finish faster |
+| Invalid header fields | dropped | Request-smuggling defence, no cost |
 
-## 9. Auto Scaling Group & scaling policy (M4-10)
+`alb.sh up` writes `http://<dns>` into the GitHub variable **`ALB_URL`** (used by the smoke test),
+because a re-created ALB gets a new DNS name. Target groups are free and always stay.
+
+## 9. Auto Scaling Group & scaling policy (M4-10): `asg.sh up|down|status`
+| Setting | Value | Why |
+|---------|-------|-----|
+| Name | `taskflow-asg` | Contract |
+| Launch template | `taskflow-lt`, version `$Default` | `05-launch-template.sh` updates the default; an instance refresh rolls it out |
+| Subnets | private-a (us-east-1a) + private-b (us-east-1b) | ≥ 2 AZs, no public IPs |
+| Size | min **2** / desired 2 / max 4 | Brief: min 2. One instance per AZ survives the loss of an instance or an AZ |
+| Target groups | both | Each instance runs both containers |
+| Health check | **ELB**, grace 180 s | An instance whose containers fail health checks is replaced, not just a dead VM |
+| Instance warm-up | 120 s | New instances don't skew the CPU average while booting |
+| Scaling policy | `taskflow-cpu-target-tracking`: average CPU **50 %** | Scales out under load, back in afterwards |
+| Group metrics | enabled, 1 minute | Desired/InService graphs for the scaling evidence |
+
+`asg.sh down` sets min/desired to 0. The group and its policy are kept, so `asg.sh up` restores it.
+
+**Tested 20 Nov 2026** with a throwaway placeholder container on both ports (the real images did not
+exist yet; placeholder removed and `image_tag` set back to `none` afterwards): 2 instances InService,
+one in each AZ, both target groups healthy after ~90 s · `GET /` → frontend 200, `GET /api/health` →
+backend 200 through the ALB · port 3000 not reachable from the internet · **one instance terminated
+under traffic**: ASG launched a replacement, InService again after ~1 min 50 s. 11 of 12 requests
+during that window succeeded; the one failure came before the ALB marked the instance unhealthy, so
+health checks were tightened from 15 s × 3 to 10 s × 2.
+
+### Session Manager instead of SSH (M4-11)
+Instances have no key pair, no public IP, and no security group allows port 22. Every instance
+registered with SSM (`aws ssm describe-instance-information` → Online). Shell:
+`aws ssm start-session --target <instance-id>` or EC2 console → Connect → Session Manager.
 
 ## 10. ECR (M2-07)
 
 ## 11. CloudWatch, SNS (M1 dashboard/alarms/SNS, M2 log groups)
 
-## Deploy from scratch — order
-1. `01-network.sh` (VPC, subnets, IGW, route tables), then `nat.sh up`
-2. `02-security-groups.sh`
-3. `03-iam.sh` (OIDC provider, roles)
-4. ECR repos, then run the pipeline once to push images
-5. `rds.sh up` (secret + RDS), `04-ssm-params.sh`
-6. Launch template → target groups → ALB → ASG
-7. CloudWatch log groups, SNS, alarms, dashboard
+## Deploy from scratch: order
+```bash
+export AWS_PROFILE=<admin profile>
+BUDGET_EMAILS=... infra/00-budget.sh
+infra/00-team-users.sh
+infra/01-network.sh
+infra/02-security-groups.sh
+infra/03-iam.sh                 # then set GitHub variables AWS_ACCOUNT_ID, AWS_REGION
+infra/04-ssm-params.sh
+infra/05-launch-template.sh
+infra/06-target-groups.sh
+# M2: ECR repos + log groups; first merge to main pushes images (stage 11)
+infra/up.sh                     # RDS -> NAT -> ALB (sets ALB_URL) -> ASG
+# M1: SNS topic, alarms, dashboard, CloudWatch agent config in SSM
+```
 
-## Tear down — order (ONLY after grading)
-1. ASG (set to 0, then delete) → launch template
-2. ALB → target groups
-3. RDS: disable deletion protection, delete (skip final snapshot) → secret (`--force-delete-without-recovery`) → DB subnet group
-4. NAT gateway → release Elastic IP
-5. VPC (removes subnets, route tables, IGW, SGs)
-6. ECR repos, log groups, alarms, dashboard, SNS, SSM params
-7. IAM roles + OIDC provider
-8. Check Billing → no running resources
+## Pause between work sessions (not during grading)
+```bash
+infra/down.sh    # ASG -> 0, ALB deleted, NAT deleted, RDS stopped. Config and data kept
+infra/up.sh      # back in ~10 minutes (RDS start is the slow part)
+```
+
+## Tear down: ONLY after grading
+```bash
+CONFIRM=delete-taskflow infra/teardown.sh
+```
+Order it follows: ASG → launch template → ALB → target groups → RDS (deletion protection off, no
+final snapshot) → secret → DB subnet group → NAT + Elastic IP → security groups → route tables →
+subnets → IGW → VPC → ECR repos → log groups → SSM parameters → alarms, dashboard, SNS →
+IAM roles, instance profile, OIDC provider. Budget and team IAM users are left on purpose.
+Finally check Billing and `aws resourcegroupstaggingapi get-resources --tag-filters Key=Project,Values=taskflow`.
 
 ## Cost notes
 Rough hourly prices (us-east-1): NAT $0.045 + EIP $0.005 · ALB ~$0.0225 + public IPv4 ·
