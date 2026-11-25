@@ -15,7 +15,7 @@
 | App, tests & monitoring | M1 | 0 / 14 |
 | Containers, scripts, CD & PDF | M2 | 0 / 15 |
 | CI, DevSecOps, diagram & report | M3 | 0 / 16 |
-| AWS infra & incident note | M4 | 0 / 16 |
+| AWS infra & incident note | M4 | 4 / 16 |
 | Demos | Whole team | 0 / 7 |
 | Submission | Whole team | 0 / 12 |
 
@@ -95,13 +95,13 @@ Tick your own initials when done.
 
 | ID | Task | Due | Built | Tested | Proof |
 |----|------|-----|-------|--------|-------|
-| M4-00 | AWS budget alert, IAM users + MFA, region us-east-1 | 17 Nov | ⬜ | ⬜ | |
-| M4-01 | VPC, 4 subnets, IGW, NAT, route tables | 19 Nov | ⬜ | ⬜ | |
-| M4-02 | Security groups (no SSH) | 19 Nov | ⬜ | ⬜ | |
-| M4-03 | GitHub OIDC provider + CI role + deploy role | 20 Nov | ⬜ | ⬜ | |
-| M4-04 | EC2 role + instance profile | 20 Nov | ⬜ | ⬜ | |
-| M4-05 | RDS Postgres + Secrets Manager password | 21 Nov | ⬜ | ⬜ | |
-| M4-06 | SSM parameters for image tags | 21 Nov | ⬜ | ⬜ | |
+| M4-00 | AWS budget alert, IAM users + MFA, region us-east-1 | 17 Nov | ✅ | ⬜ | PR #1 (`00-budget.sh`, `00-team-users.sh`); 🚧 members confirm login + MFA |
+| M4-01 | VPC, 4 subnets, IGW, NAT, route tables | 19 Nov | ✅ | ✅ | PR #1 (`01-network.sh`, `nat.sh`); re-run creates nothing; IDs in infra/README §1–2 |
+| M4-02 | Security groups (no SSH) | 19 Nov | ✅ | ✅ | PR #1 (`02-security-groups.sh`); rules in infra/README §3 |
+| M4-03 | GitHub OIDC provider + CI role + deploy role | 20 Nov | ✅ | ⬜ | PR #1 (`03-iam.sh`); 🚧 needs a workflow on main to assume the role |
+| M4-04 | EC2 role + instance profile | 20 Nov | ✅ | ✅ | PR #1 (`iam/ec2-*.json`); instance profile exists with the role |
+| M4-05 | RDS Postgres + Secrets Manager password | 21 Nov | ✅ | ⬜ | `rds.sh`; not public, encrypted, db-sg only; 🚧 connect test from an app instance (M4-07) |
+| M4-06 | SSM parameters for image tags | 21 Nov | ✅ | ✅ | `04-ssm-params.sh`; both params exist (`none`) |
 | M4-07 | `infra/user-data.sh` (with M2) | 22 Nov | ⬜ | ⬜ | |
 | M4-08 | Launch template (IMDSv2, no key pair) | 22 Nov | ⬜ | ⬜ | |
 | M4-09 | ALB + 2 target groups + path routing | 23 Nov | ⬜ | ⬜ | |

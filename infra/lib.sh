@@ -68,3 +68,16 @@ find_vpc_id() {
   q aws ec2 describe-vpcs --filters "Name=tag:Name,Values=$VPC_NAME" \
     --query 'Vpcs[0].VpcId' --output text
 }
+
+# Data layer
+DB_ID="taskflow-db"
+DB_SUBNET_GROUP="taskflow-db-subnets"
+DB_SECRET="taskflow/prod/db"
+DB_NAME="taskflow"
+DB_USER="taskflow"
+DB_CLASS="db.t4g.micro"
+DB_MAJOR="17"
+
+# SSM parameters read by user-data and written by the deploy job
+PARAM_IMAGE_TAG="/taskflow/prod/image_tag"
+PARAM_PREVIOUS_TAG="/taskflow/prod/previous_image_tag"
