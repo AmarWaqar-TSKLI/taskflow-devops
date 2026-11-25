@@ -44,10 +44,10 @@ Tick your own initials when done.
 | M1-07 | JSON request logging | 22 Nov | ✅ | ✅ | `src/logger.js` emits `{"level","msg","method","path","status","duration_ms"}` JSON lines; unit + container log verified |
 | M1-08 | `APP_VERSION` in health response | 22 Nov | ✅ | ✅ | `GET /api/health` returns `APP_VERSION` (unit tested + container tested with `v1.0.99`) |
 | M1-09 | k6 load test script + README | 25 Nov | ✅ | ⬜ | `loadtest/load.js` + `loadtest/README.md`; local `grafana/k6` smoke run passed (0% failed); 🚧 live ALB scale-out run in D-04 |
-| M1-10 | CloudWatch agent config (memory) | 23 Nov | ✅ | ⬜ | `monitoring/cloudwatch-agent.json` valid JSON; 🚧 upload to SSM `/taskflow/prod/cloudwatch-agent` in `627551519533` + verify `mem_used_percent` on EC2 |
-| M1-11 | SNS topic + all members subscribed | 23 Nov | ✅ | ⬜ | `monitoring/setup-monitoring.sh` (`taskflow-alerts`); 🚧 run in `627551519533`, all 4 confirm email |
-| M1-12 | Dashboard + `monitoring/dashboard.json` | 24 Nov | ✅ | ⬜ | `monitoring/setup-monitoring.sh` + `monitoring/dashboard.json`; 🚧 export live ALB/ASG dashboard + screenshot (`D-07`) |
-| M1-13 | ≥ 2 alarms, each tested | 24 Nov | ✅ | ⬜ | `monitoring/alarms.md` + 4 alarms in `setup-monitoring.sh`; 🚧 trigger each once against live AWS (`D-07`) |
+| M1-10 | CloudWatch agent config (memory) | 23 Nov | ✅ | ⬜ | `monitoring/cloudwatch-agent.json` uploaded to SSM `/taskflow/prod/cloudwatch-agent` (v1, `627551519533`); 🚧 verify `mem_used_percent` on EC2 boot |
+| M1-11 | SNS topic + all members subscribed | 23 Nov | ✅ | ⬜ | `taskflow-alerts` created in `627551519533` + all 4 `@lhr.nu.edu.pk` emails subscribed; 🚧 members confirm email + test publish |
+| M1-12 | Dashboard + `monitoring/dashboard.json` | 24 Nov | ✅ | ⬜ | `taskflow-dashboard` created in CloudWatch (`ASG` + `CWAgent` live); 🚧 re-run `setup-monitoring.sh up` after `infra/up.sh` to attach ALB widgets + screenshot |
+| M1-13 | ≥ 2 alarms, each tested | 24 Nov | ✅ | ⬜ | `taskflow-high-cpu` live + `monitoring/alarms.md` + 3 ALB/TG alarms in `setup-monitoring.sh`; 🚧 run after `infra/up.sh` & trigger each (`D-07`) |
 | M1-14 | App README section + lessons for report | 29 Nov | ✅ | ⬜ | Added `Application, Testing & Monitoring` to root `README.md`; 🚧 add final lessons learned to `report.md` after demos |
 
 ## Member 2 — Containers, shell scripts, CD, README & PDF
