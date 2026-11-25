@@ -15,7 +15,7 @@
 | App, tests & monitoring | M1 | 0 / 14 |
 | Containers, scripts, CD & PDF | M2 | 0 / 15 |
 | CI, DevSecOps, diagram & report | M3 | 0 / 16 |
-| AWS infra & incident note | M4 | 4 / 16 |
+| AWS infra & incident note | M4 | 6 / 16 |
 | Demos | Whole team | 0 / 7 |
 | Submission | Whole team | 0 / 12 |
 
@@ -100,10 +100,10 @@ Tick your own initials when done.
 | M4-02 | Security groups (no SSH) | 19 Nov | ✅ | ✅ | PR #1 (`02-security-groups.sh`); rules in infra/README §3 |
 | M4-03 | GitHub OIDC provider + CI role + deploy role | 20 Nov | ✅ | ⬜ | PR #1 (`03-iam.sh`); 🚧 needs a workflow on main to assume the role |
 | M4-04 | EC2 role + instance profile | 20 Nov | ✅ | ✅ | PR #1 (`iam/ec2-*.json`); instance profile exists with the role |
-| M4-05 | RDS Postgres + Secrets Manager password | 21 Nov | ✅ | ⬜ | `rds.sh`; not public, encrypted, db-sg only; 🚧 connect test from an app instance (M4-07) |
+| M4-05 | RDS Postgres + Secrets Manager password | 21 Nov | ✅ | ✅ | `rds.sh`; not public, encrypted, db-sg only; reachable on 5432 from an app-sg instance (infra/README §7) |
 | M4-06 | SSM parameters for image tags | 21 Nov | ✅ | ✅ | `04-ssm-params.sh`; both params exist (`none`) |
-| M4-07 | `infra/user-data.sh` (with M2) | 22 Nov | ⬜ | ⬜ | |
-| M4-08 | Launch template (IMDSv2, no key pair) | 22 Nov | ⬜ | ⬜ | |
+| M4-07 | `infra/user-data.sh` (with M2) | 22 Nov | ✅ | ⬜ | Host setup, secret, RDS reachability tested on a test instance (infra/README §7); 🚧 full `compose up` once M2 images + compose.prod exist |
+| M4-08 | Launch template (IMDSv2, no key pair) | 22 Nov | ✅ | ✅ | `05-launch-template.sh`; test instance: no key, no public IP, IMDSv2 required |
 | M4-09 | ALB + 2 target groups + path routing | 23 Nov | ⬜ | ⬜ | |
 | M4-10 | ASG (min 2, 2 AZs, target tracking) | 23 Nov | ⬜ | ⬜ | |
 | M4-11 | SSM Session Manager works, SSH impossible | 23 Nov | ⬜ | ⬜ | |

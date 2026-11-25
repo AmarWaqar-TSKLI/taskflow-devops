@@ -20,6 +20,7 @@ infra/01-network.sh                  # VPC, subnets, IGW, route tables       (fr
 infra/02-security-groups.sh          # alb-sg, app-sg, db-sg                  (free, stays up)
 infra/03-iam.sh                      # OIDC provider + 3 roles + profile      (free, stays up)
 infra/04-ssm-params.sh               # image tag parameters                   (free, stays up)
+infra/05-launch-template.sh          # taskflow-lt + user-data.sh             (free)
 infra/nat.sh up|down|status          # NAT gateway                            (paid, on demand)
 infra/rds.sh up|down|status          # RDS Postgres + secret                  (paid, on demand)
 ```
@@ -114,8 +115,29 @@ stopped instance automatically after 7 days, so check `rds.sh status` during lon
 Standard tier `String` parameters (free). The script never overwrites an existing value, because
 after the first deploy these hold the live version.
 
-## 7. Launch template & user-data (M4-07, M4-08)
-User-data: [`user-data.sh`](user-data.sh)
+## 7. Launch template & user-data (M4-07, M4-08): `05-launch-template.sh`, `user-data.sh`
+| Setting | Value | Why |
+|---------|-------|-----|
+| Name | `taskflow-lt` (re-running the script adds a version and makes it default) | ASG always launches the default version |
+| AMI | Latest Amazon Linux 2023 x86_64, from public SSM param `/aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64` | Patched base, SSM agent + AWS CLI preinstalled |
+| Instance type | `t3.micro` | Smallest general-purpose type the brief allows; 2 vCPU burst for the load test |
+| Key pair | **none** | SSH is closed; shell access is SSM Session Manager |
+| Metadata | **IMDSv2 required**, hop limit 2 | Blocks SSRF-style credential theft via IMDSv1; hop 2 lets containers reach IMDS if ever needed |
+| IAM | instance profile `taskflow-ec2-role` | ECR pull, read tag/compose/secret, CloudWatch, SSM |
+| Network | SG `taskflow-app-sg`, no public IP (subnets come from the ASG) | Only the ALB can reach the instance |
+| Disk | 8 GB gp3, encrypted, deleted on termination | Smallest root volume for AL2023 |
+
+**What `user-data.sh` does at boot:** installs Docker, Compose plugin `v2.32.4` (checksum-verified)
+and the CloudWatch agent → starts the agent with `/taskflow/prod/cloudwatch-agent` if present →
+reads `/taskflow/prod/image_tag` (if `none`, stops here) → writes `/opt/taskflow/docker-compose.prod.yml`
+(from `/taskflow/prod/compose_file`), `.env` and `backend.env` (0600, DB secret) → ECR login →
+`docker compose pull && up -d`. Full log on the instance: `/var/log/taskflow-user-data.log`.
+
+**Tested 20 Nov 2026** (one instance from `taskflow-lt` in private-a, NAT up, then terminated):
+private IP only, no public IP, no key pair, IMDSv2 `required` · SSM agent Online (Session Manager
+works without SSH) · user-data finished, Docker + Compose v2.32.4 installed · instance reaches RDS on
+5432 (app-sg → db-sg) · reads the DB secret, `backend.env` built with all 5 keys at mode 600 · an
+attempt to *write* `/taskflow/prod/image_tag` from the instance is denied (role is read-only).
 
 ## 8. Load balancer & target groups (M4-09)
 
