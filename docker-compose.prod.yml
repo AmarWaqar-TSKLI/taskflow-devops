@@ -1,0 +1,51 @@
+# TaskFlow on EC2 (one copy per ASG instance). Not for local use: see docker-compose.yml.
+# 12-deploy stores this file in SSM /taskflow/prod/compose_file (4 KB limit, keep it short);
+# infra/user-data.sh writes it to /opt/taskflow next to:
+#   .env         IMAGE_TAG, ECR_REGISTRY, AWS_REGION (interpolation below)
+#   backend.env  PORT, APP_VERSION, LOG_LEVEL, DB_* from Secrets Manager (0600, root)
+# No db service: the backend uses RDS. Logs go to CloudWatch (log groups from ARCHITECTURE §3.5).
+name: taskflow
+
+x-app: &app
+  restart: always
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+  networks: [taskflow]
+
+x-logs: &logs
+  driver: awslogs
+  options: &log-opts
+    awslogs-region: ${AWS_REGION:-us-east-1}
+    mode: non-blocking
+    max-buffer-size: 4m
+
+services:
+  backend:
+    <<: *app
+    image: ${ECR_REGISTRY:?}/taskflow-backend:${IMAGE_TAG:?}
+    env_file: backend.env
+    ports: ["3000:3000"]
+    logging:
+      <<: *logs
+      options:
+        <<: *log-opts
+        awslogs-group: /taskflow/backend
+        tag: "backend/{{.ID}}"
+
+  frontend:
+    <<: *app
+    image: ${ECR_REGISTRY:?}/taskflow-frontend:${IMAGE_TAG:?}
+    tmpfs: [/tmp]
+    ports: ["8080:8080"]
+    depends_on: [backend]
+    logging:
+      <<: *logs
+      options:
+        <<: *log-opts
+        awslogs-group: /taskflow/frontend
+        tag: "frontend/{{.ID}}"
+
+networks:
+  taskflow:
+    name: taskflow
