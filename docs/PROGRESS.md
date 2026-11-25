@@ -45,10 +45,10 @@ Tick your own initials when done.
 | M1-08 | `APP_VERSION` in health response | 22 Nov | ✅ | ✅ | `GET /api/health` returns `APP_VERSION` (unit tested + container tested with `v1.0.99`) |
 | M1-09 | k6 load test script + README | 25 Nov | ✅ | ⬜ | `loadtest/load.js` + `loadtest/README.md`; local `grafana/k6` smoke run passed (0% failed); 🚧 live ALB scale-out run in D-04 |
 | M1-10 | CloudWatch agent config (memory) | 23 Nov | ✅ | ⬜ | `monitoring/cloudwatch-agent.json` valid JSON; 🚧 upload to SSM `/taskflow/prod/cloudwatch-agent` in `627551519533` + verify `mem_used_percent` on EC2 |
-| M1-11 | SNS topic + all members subscribed | 23 Nov | ⬜ | ⬜ | |
-| M1-12 | Dashboard + `monitoring/dashboard.json` | 24 Nov | ⬜ | ⬜ | |
-| M1-13 | ≥ 2 alarms, each tested | 24 Nov | ⬜ | ⬜ | |
-| M1-14 | App README section + lessons for report | 29 Nov | ⬜ | ⬜ | |
+| M1-11 | SNS topic + all members subscribed | 23 Nov | ✅ | ⬜ | `monitoring/setup-monitoring.sh` (`taskflow-alerts`); 🚧 run in `627551519533`, all 4 confirm email |
+| M1-12 | Dashboard + `monitoring/dashboard.json` | 24 Nov | ✅ | ⬜ | `monitoring/setup-monitoring.sh` + `monitoring/dashboard.json`; 🚧 export live ALB/ASG dashboard + screenshot (`D-07`) |
+| M1-13 | ≥ 2 alarms, each tested | 24 Nov | ✅ | ⬜ | `monitoring/alarms.md` + 4 alarms in `setup-monitoring.sh`; 🚧 trigger each once against live AWS (`D-07`) |
+| M1-14 | App README section + lessons for report | 29 Nov | ✅ | ⬜ | Added `Application, Testing & Monitoring` to root `README.md`; 🚧 add final lessons learned to `report.md` after demos |
 
 ## Member 2 — Containers, shell scripts, CD, README & PDF
 
