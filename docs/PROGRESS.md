@@ -62,10 +62,10 @@ Tick your own initials when done.
 | M2-06 | `scripts/smoke-test.sh` | 21 Nov | ⬜ | ⬜ | |
 | M2-07 | ECR repos (immutable tags, scan on push, lifecycle) | 21 Nov | ⬜ | ⬜ | |
 | M2-08 | `docker-compose.prod.yml` (ECR images, awslogs, env file) | 22 Nov | ⬜ | ⬜ | |
-| M2-09 | Job `11-push-image` (OIDC, SHA + semver tags) | 23 Nov | ⬜ | ⬜ | |
+| M2-09 | Job `11-push-image` (OIDC, SHA + semver tags) | 23 Nov | ✅ | ⬜ | PR #9: `push-image.yml` (reusable, called by job 11) · actionlint clean · artifact loading tested locally; 🚧 M3 adds the caller to `pipeline.yml`, then both tags in ECR after a merge |
 | M2-10 | `scripts/deploy.sh` | 24 Nov | ⬜ | ⬜ | |
-| M2-11 | Job `12-deploy` + auto-rollback | 25 Nov | ⬜ | ⬜ | |
-| M2-12 | `rollback.yml` manual workflow | 26 Nov | ⬜ | ⬜ | |
+| M2-11 | Job `12-deploy` + auto-rollback | 25 Nov | ✅ | ⬜ | PR #9: `deploy.yml` (reusable, called by job 12): deploy.sh → smoke-test.sh → auto-rollback · actionlint clean; 🚧 needs a bad build on AWS |
+| M2-12 | `rollback.yml` manual workflow | 26 Nov | ✅ | ⬜ | PR #9: `rollback.yml` (verify tag in ECR → same deploy + smoke) · actionlint clean; 🚧 run it once on AWS |
 | M2-13 | Log groups + 7-day retention | 22 Nov | ⬜ | ⬜ | |
 | M2-14 | Root README final (run / deploy / teardown / links) | 29 Nov | ⬜ | ⬜ | |
 | M2-15 | `GroupX.pdf` assembled and submitted | 30 Nov | ⬜ | ⬜ | |
