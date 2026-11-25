@@ -58,12 +58,27 @@ Every folder has its own `README.md` saying who owns it and what goes in it.
 
 ## Run locally
 
-> Filled in by Member 2 once `docker-compose.yml` exists (task M2-03).
+Needs Docker with the Compose plugin (Docker Desktop is fine). Nothing else: Node, npm and Postgres all
+run inside containers.
 
 ```bash
-docker compose up --build
-# frontend: http://localhost:8080   backend: http://localhost:8080/api/health
+cp .env.example .env        # once: local-only DB password (git-ignored)
+docker compose up --build   # builds both images, starts db -> backend -> frontend
 ```
+
+| What | URL |
+|------|-----|
+| App | http://localhost:8080 |
+| Frontend health | http://localhost:8080/health |
+| Backend health (through nginx) | http://localhost:8080/api/health |
+
+- Only port 8080 is published. nginx in `frontend` proxies `/api/` to `backend:3000` on the Compose
+  network `taskflow`; `backend` talks to `db:5432`. The database is not reachable from the host.
+- Startup order is enforced with health checks: `backend` waits for Postgres, `frontend` waits for the
+  backend's `/api/health`.
+- Both app containers run as non-root, read-only, with all Linux capabilities dropped.
+- Useful: `docker compose logs -f backend` (JSON request logs) · `docker compose down` (stop) ·
+  `docker compose down -v` (stop and wipe the local database).
 
 ## Deploy from scratch / tear down
 

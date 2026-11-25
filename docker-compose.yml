@@ -1,0 +1,63 @@
+# Local stack, one command (after `cp .env.example .env`):
+#   docker compose up --build
+# App: http://localhost:8080 · API through nginx: http://localhost:8080/api/health
+# Names follow docs/ARCHITECTURE.md §3: services frontend/backend/db on network "taskflow".
+name: taskflow
+
+x-hardening: &hardening
+  read_only: true
+  cap_drop: [ALL]
+  security_opt: ["no-new-privileges:true"]
+
+services:
+  db:
+    image: postgres:17.12-alpine3.24
+    environment:
+      POSTGRES_DB: ${DB_NAME:-taskflow}
+      POSTGRES_USER: ${DB_USER:-taskflow}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is not set. Run cp .env.example .env first}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks: [taskflow]
+
+  backend:
+    <<: *hardening
+    build: services/backend
+    image: taskflow-backend:local
+    environment:
+      PORT: "3000"
+      APP_VERSION: dev
+      DB_HOST: db
+      DB_PORT: "5432"
+      DB_NAME: ${DB_NAME:-taskflow}
+      DB_USER: ${DB_USER:-taskflow}
+      DB_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD is not set. Run cp .env.example .env first}
+      LOG_LEVEL: debug
+    depends_on:
+      db:
+        condition: service_healthy
+    networks: [taskflow]
+
+  frontend:
+    <<: *hardening
+    build: services/frontend
+    image: taskflow-frontend:local
+    tmpfs: [/tmp]
+    ports:
+      - "8080:8080"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks: [taskflow]
+
+networks:
+  taskflow:
+    name: taskflow
+
+volumes:
+  db-data:
