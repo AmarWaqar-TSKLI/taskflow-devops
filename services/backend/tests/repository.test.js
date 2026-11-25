@@ -111,7 +111,8 @@ describe("buildPoolOptions", () => {
 
     expect(opts.ssl).toMatchObject({
       rejectUnauthorized: true,
-      ca: expect.any(String),
+      ca: expect.any(Array),
     });
+    expect(opts.ssl.ca.length).toBeGreaterThan(0);
   });
 });

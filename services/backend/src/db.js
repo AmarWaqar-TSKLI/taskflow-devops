@@ -1,8 +1,5 @@
-const fs = require("fs");
-const path = require("path");
 const { Pool } = require("pg");
-
-const RDS_CA_PATH = path.join(__dirname, "certs", "us-east-1-bundle.pem");
+const awsSslProfiles = require("aws-ssl-profiles");
 
 function buildPoolOptions(dbConfig) {
   const useRdsTls =
@@ -13,7 +10,7 @@ function buildPoolOptions(dbConfig) {
   const ssl = useRdsTls
     ? {
         rejectUnauthorized: true,
-        ca: fs.readFileSync(RDS_CA_PATH, "utf8"),
+        ca: awsSslProfiles.ca,
       }
     : false;
 

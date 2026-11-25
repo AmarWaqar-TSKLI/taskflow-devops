@@ -15,7 +15,6 @@ backend/
 │   ├── config.js            # reads env vars (PORT, APP_VERSION, DB_*, LOG_LEVEL)
 │   ├── db.js                # pg.Pool configuration (auto-TLS for *.rds.amazonaws.com)
 │   ├── errors.js            # ValidationError (400), NotFoundError (404)
-│   ├── certs/               # public AWS RDS us-east-1 CA bundle
 │   ├── routes/tasks.js      # HTTP layer: /api/tasks CRUD
 │   ├── services/tasks.js    # validation and business rules
 │   └── repositories/tasks.js # parameterized SQL via pg + startup table creation
