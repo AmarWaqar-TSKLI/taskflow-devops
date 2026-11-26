@@ -1,0 +1,40 @@
+# Manual k6 load test against the live ALB (demo D-04: scale-out -> scale-in).
+# Actions -> loadtest -> Run workflow. Defaults: 80 VUs, 2 m ramp, 10 m hold, 2 m ramp down.
+name: loadtest
+
+on:
+  workflow_dispatch:
+    inputs:
+      peak_vus:
+        description: Peak virtual users
+        default: "80"
+      hold:
+        description: How long to hold the peak (k6 duration)
+        default: 10m
+
+permissions:
+  contents: read
+
+jobs:
+  k6:
+    name: k6 against ALB
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      K6_IMAGE: grafana/k6:2.3.0@sha256:2dd4756ec6e14e62778916e1eb850108e4b499304c02df56760fa0bdb0fba0b8
+      BASE_URL: ${{ vars.ALB_URL }}
+      PEAK_VUS: ${{ inputs.peak_vus }}
+      HOLD: ${{ inputs.hold }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: k6 run
+        run: |
+          mkdir -p results
+          docker run --rm -i --user "$(id -u):$(id -g)" -v "$PWD/results:/results" "$K6_IMAGE" run \
+            -e BASE_URL="$BASE_URL" -e PEAK_VUS="$PEAK_VUS" -e HOLD="$HOLD" -e RAMP_UP=2m -e RAMP_DOWN=2m \
+            --summary-export /results/summary.json - < loadtest/load.js
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: always()
+        with:
+          name: k6-summary
+          path: results/summary.json
