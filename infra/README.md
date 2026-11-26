@@ -88,7 +88,7 @@ Policies are in [`iam/`](iam/), with `{{ACCOUNT_ID}}` filled in when the script 
 | Resource | ARN | Trusted by | Can do |
 |----------|-----|-----------|--------|
 | OIDC provider | `arn:aws:iam::627551519533:oidc-provider/token.actions.githubusercontent.com` | — | Audience `sts.amazonaws.com` |
-| `taskflow-github-ci-role` | `arn:aws:iam::627551519533:role/taskflow-github-ci-role` | `repo:AmarWaqar-TSKLI/taskflow-devops:ref:refs/heads/main` only | Push to the two ECR repos (+ `GetAuthorizationToken`) |
+| `taskflow-github-ci-role` | `arn:aws:iam::627551519533:role/taskflow-github-ci-role` | `repo:hussainwaz/taskflow-devops:ref:refs/heads/main` only | Push to the two ECR repos (+ `GetAuthorizationToken`) |
 | `taskflow-github-deploy-role` | `arn:aws:iam::627551519533:role/taskflow-github-deploy-role` | same, `main` only | Get/put `/taskflow/prod/*` params, instance refresh on `taskflow-asg`, `ecr:DescribeImages` |
 | `taskflow-ec2-role` (+ instance profile) | `arn:aws:iam::627551519533:role/taskflow-ec2-role` | `ec2.amazonaws.com` | Read `/taskflow/prod/*` + secret `taskflow/prod/db`; managed: `AmazonSSMManagedInstanceCore`, `CloudWatchAgentServerPolicy`, `AmazonEC2ContainerRegistryReadOnly` |
 

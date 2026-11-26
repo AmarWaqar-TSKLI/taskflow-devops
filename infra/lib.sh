@@ -9,7 +9,7 @@ export AWS_PAGER=""
 
 PROJECT="taskflow"
 OWNER_TAG="M4"
-GITHUB_REPO="AmarWaqar-TSKLI/taskflow-devops"
+GITHUB_REPO="hussainwaz/taskflow-devops"
 IAM_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/iam"
 
 # Network (ARCHITECTURE §4)

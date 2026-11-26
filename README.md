@@ -165,7 +165,7 @@ dashboard, SNS topic, IAM roles and the OIDC provider. Then check AWS Billing fo
 
 | What | Link |
 |------|------|
-| GitHub repo | https://github.com/AmarWaqar-TSKLI/taskflow-devops |
+| GitHub repo | https://github.com/hussainwaz/taskflow-devops |
 | Live app (ALB URL) | `http://<alb-dns-name>` |
 | SonarCloud project | |
 | Snyk project | |
