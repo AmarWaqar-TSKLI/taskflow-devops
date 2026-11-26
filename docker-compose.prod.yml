@@ -31,7 +31,6 @@ services:
       options:
         <<: *log-opts
         awslogs-group: /taskflow/backend
-        tag: "backend/{{.ID}}"
 
   frontend:
     <<: *app
@@ -44,7 +43,6 @@ services:
       options:
         <<: *log-opts
         awslogs-group: /taskflow/frontend
-        tag: "frontend/{{.ID}}"
 
 networks:
   taskflow:
