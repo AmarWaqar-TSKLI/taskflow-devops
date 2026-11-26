@@ -16,10 +16,22 @@
 | Containers, scripts, CD & PDF | M2 | 12 / 15 |
 | CI, DevSecOps, diagram & report | M3 | 10 / 16 |
 | AWS infra & incident note | M4 | 13 / 16 |
-| Demos | Whole team | 5 / 7 |
+| Demos | Whole team | 6 / 7 |
 | Submission | Whole team | 0 / 12 |
 
 ---
+
+## Status 27 Nov — what's left
+
+- **Live:** http://taskflow-alb-466982077.us-east-1.elb.amazonaws.com (v1.0.20, auto-deployed by the pipeline). Paid AWS layer stays **up until grading**.
+- **Screenshots still needed** (D-01…D-07 were run, captured from the CLI; nobody has taken console screenshots yet). Names are in `docs/evidence/README.md`. Run IDs are in the Demos table below.
+- **Branch protection:** removed 26 Nov so everyone can push to main. The brief needs a **screenshot of branch protection** (D-06 / M3-10): Hussain (admin) re-enables it with required checks 2-10, takes the screenshot, and decides whether to keep it on.
+- **D-06** (multi-AZ, OIDC trust policy, ECR tags, branch protection): console screenshots only, everything already exists.
+- **M3-14** architecture diagram → `docs/submission/architecture.png` (not started).
+- **SonarCloud** project is still under Amar's Sonar org and bound to the old repo; main analysis works, PRs are analysed as branches. Optional: re-import under Hussain.
+- **Report** `docs/submission/report.md` drafted: every member checks their row. **PDF** `GroupX.pdf` (M2-15), group number still blank in WORK.md.
+- **Member setup** T-01…T-03 ticks: each member ticks their own.
+- Close PR #22 after its screenshot (it must never be merged).
 
 ## Member setup — each member, by Tue 17 Nov
 
@@ -120,9 +132,9 @@ No owners: the team runs these together and rotates who drives (details in [WORK
 | ID | Demo | Driven by | Done | Screenshots saved |
 |----|------|-----------|------|-------------------|
 | D-01 | CI run, jobs 2–10 separate | Amar (CLI) — pipeline run 45879965344 | ✅ | ⬜ |
-| D-02 | Security stage blocks a PR | | ⬜ | ⬜ |
+| D-02 | Security stage blocks a PR | Amar (CLI) — PR #22, run 45895734843: `8-dependency-scan` (Snyk, lodash 4.17.20) failed, 9–12 skipped | ✅ | ⬜ |
 | D-03 | Instance terminated → stays up → recovers | Amar (CLI) — instance kill 26 Nov 19:13 UTC | ✅ | ⬜ |
-| D-04 | Load test → scale-out → scale-in | Amar (CLI) — loadtest run 45887496574 | ✅ | ⬜ |
+| D-04 | Load test → scale-out → scale-in | Amar (CLI) — loadtest run 45887496574: out 2→4 at 20:04/20:07 UTC, in 4→2 at 20:26/20:32 UTC | ✅ | ⬜ |
 | D-05 | Commit auto-deployed + rollback | Amar (CLI) — deploy 45879965344 + rollback 45881326487 | ✅ | ⬜ |
 | D-06 | Multi-AZ, OIDC trust, ECR tags, branch protection | | ⬜ | ⬜ |
 | D-07 | Deliberate failure → alarm → fix → note | Amar (CLI) — incident 26 Nov 19:27 UTC | ✅ | ⬜ |
