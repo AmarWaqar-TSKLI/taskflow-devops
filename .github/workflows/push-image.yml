@@ -38,7 +38,7 @@ jobs:
     outputs:
       image-tag: ${{ steps.tags.outputs.version }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           sparse-checkout: VERSION
           sparse-checkout-cone-mode: false
@@ -51,7 +51,7 @@ jobs:
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "Tags: $GITHUB_SHA and $version"
 
-      - uses: actions/download-artifact@v8
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           name: ${{ inputs.artifact-name }}
           path: images
@@ -74,12 +74,12 @@ jobs:
             echo "$svc: $(cat "images/$svc.ref")"
           done
 
-      - uses: aws-actions/configure-aws-credentials@v6
+      - uses: aws-actions/configure-aws-credentials@45666896f5d8e0f10ae255413f3a4cdd03bdc8f5 # v6
         with:
           role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/taskflow-github-ci-role
           aws-region: ${{ vars.AWS_REGION }}
 
-      - uses: aws-actions/amazon-ecr-login@v2
+      - uses: aws-actions/amazon-ecr-login@7290e214a610b32bc0eef81748948b6d466a8783 # v2
         id: ecr
 
       - name: Tag and push (SHA + version)

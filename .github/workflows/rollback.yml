@@ -16,7 +16,6 @@ on:
 
 permissions:
   contents: read
-  id-token: write
 
 jobs:
   verify-tag:
@@ -24,6 +23,9 @@ jobs:
     if: github.ref == 'refs/heads/main' # the AWS roles trust main only
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
+      id-token: write
     env:
       IMAGE_TAG: ${{ inputs.image_tag }}
     steps:
@@ -32,7 +34,7 @@ jobs:
           [[ "$IMAGE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ || "$IMAGE_TAG" =~ ^[0-9a-f]{40}$ ]] ||
             { echo "::error::'$IMAGE_TAG' is not a version tag (v1.0.40) or a full git SHA"; exit 1; }
 
-      - uses: aws-actions/configure-aws-credentials@v6
+      - uses: aws-actions/configure-aws-credentials@45666896f5d8e0f10ae255413f3a4cdd03bdc8f5 # v6
         with:
           role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/taskflow-github-deploy-role
           aws-region: ${{ vars.AWS_REGION }}
@@ -52,6 +54,9 @@ jobs:
   rollback:
     name: rollback
     needs: verify-tag
+    permissions:
+      contents: read
+      id-token: write
     uses: ./.github/workflows/deploy.yml
     with:
       image-tag: ${{ inputs.image_tag }}
