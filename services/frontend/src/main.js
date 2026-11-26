@@ -59,7 +59,7 @@ async function mountApp(root) {
 function init() {
   const root = document.getElementById("app");
   if (root) {
-    mountApp(root);
+    void mountApp(root); // mountApp handles its own errors
   }
 }
 
