@@ -13,9 +13,9 @@
 |------|-------|--------------|
 | Member setup | Each member | 0 / 3 |
 | App, tests & monitoring | M1 | 8 / 14 |
-| Containers, scripts, CD & PDF | M2 | 7 / 15 |
-| CI, DevSecOps, diagram & report | M3 | 0 / 16 |
-| AWS infra & incident note | M4 | 8 / 16 |
+| Containers, scripts, CD & PDF | M2 | 9 / 15 |
+| CI, DevSecOps, diagram & report | M3 | 10 / 16 |
+| AWS infra & incident note | M4 | 12 / 16 |
 | Demos | Whole team | 0 / 7 |
 | Submission | Whole team | 0 / 12 |
 
@@ -61,8 +61,8 @@ Tick your own initials when done.
 | M2-05 | `scripts/healthcheck.sh` | 20 Nov | ✅ | ✅ | PR #7: ShellCheck clean · exit 0 vs local Compose · exit 1 for a dead URL · exit 2 on bad args (output in PR) |
 | M2-06 | `scripts/smoke-test.sh` | 21 Nov | ✅ | ✅ | PR #7: ShellCheck clean · passes vs local Compose · fails when backend stopped or version mismatches (output in PR) |
 | M2-07 | ECR repos (immutable tags, scan on push, lifecycle) | 21 Nov | ✅ | ✅ | PR #8: created 25 Nov in 627551519533 (CloudShell, same settings as `scripts/aws-ecr-logs.sh`): IMMUTABLE, scan on push, AES256, keep newest 20 · `docs/evidence/M2-07-01-ecr-repos-console.jpg`, `M2-07-02-ecr-logs-cli-verify.jpg` |
-| M2-08 | `docker-compose.prod.yml` (ECR images, awslogs, env file) | 22 Nov | ✅ | ⬜ | PR #8: `compose config` valid, 1.4 KB (fits SSM), smoke test passes locally with awslogs swapped for json-file; 🚧 EC2 test instance with M4 |
-| M2-09 | Job `11-push-image` (OIDC, SHA + semver tags) | 23 Nov | ✅ | ⬜ | PR #9: `push-image.yml` (reusable, called by job 11) · actionlint clean · artifact loading tested locally; 🚧 M3 adds the caller to `pipeline.yml`, then both tags in ECR after a merge |
+| M2-08 | `docker-compose.prod.yml` (ECR images, awslogs, env file) | 22 Nov | ✅ | ✅ | In SSM `/taskflow/prod/compose_file`; instances run it with awslogs (fixed `{{.ID}}` tag that SSM rejects) |
+| M2-09 | Job `11-push-image` (OIDC, SHA + semver tags) | 23 Nov | ✅ | ✅ | `v1.0.15` + full SHA tags in both ECR repos · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
 | M2-10 | `scripts/deploy.sh` | 24 Nov | ✅ | ⬜ | PR #8: ShellCheck clean · 7 cases vs a fake aws CLI (deploy, missing tag, failed refresh, waits for running refresh, timeout cancel, rollback, bad tag), output in PR; 🚧 real refresh |
 | M2-11 | Job `12-deploy` + auto-rollback | 25 Nov | ✅ | ⬜ | PR #9: `deploy.yml` (reusable, called by job 12): deploy.sh → smoke-test.sh → auto-rollback · actionlint clean; 🚧 needs a bad build on AWS |
 | M2-12 | `rollback.yml` manual workflow | 26 Nov | ✅ | ⬜ | PR #9: `rollback.yml` (verify tag in ECR → same deploy + smoke) · actionlint clean; 🚧 run it once on AWS |
@@ -74,19 +74,19 @@ Tick your own initials when done.
 
 | ID | Task | Due | Built | Tested | Proof |
 |----|------|-----|-------|--------|-------|
-| M3-00 | `main` protected + SonarCloud/Snyk tokens in GitHub Secrets | 17 Nov | ⬜ | ⬜ | |
-| M3-01 | `pipeline.yml` skeleton, jobs chained in order | 18 Nov | ⬜ | ⬜ | |
-| M3-02 | `2-secret-scan` Gitleaks full history | 18 Nov | ⬜ | ⬜ | |
-| M3-03 | `3-lint` (ESLint + ShellCheck), `4-format` (Prettier) | 19 Nov | ⬜ | ⬜ | |
-| M3-04 | `5-dockerfile-lint` Hadolint | 19 Nov | ⬜ | ⬜ | |
-| M3-05 | `6-unit-tests` Jest + coverage | 20 Nov | ⬜ | ⬜ | |
-| M3-06 | `7-static-analysis` SonarCloud + quality gate | 20 Nov | ⬜ | ⬜ | |
-| M3-07 | `8-dependency-scan` Snyk + `dependabot.yml` | 21 Nov | ⬜ | ⬜ | |
-| M3-08 | `9-build-image` + image artifacts | 21 Nov | ⬜ | ⬜ | |
-| M3-09 | `10-image-scan` Trivy HIGH/CRITICAL | 21 Nov | ⬜ | ⬜ | |
+| M3-00 | `main` protected + SonarCloud/Snyk tokens in GitHub Secrets | 17 Nov | ✅ | ✅ | `SONAR_TOKEN`, `SNYK_TOKEN` in repo secrets. Branch protection removed 26 Nov (team pushes to main), see M3-10 |
+| M3-01 | `pipeline.yml` skeleton, jobs chained in order | 18 Nov | ✅ | ✅ | `pipeline.yml`: jobs 2→12 chained with `needs:` · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
+| M3-02 | `2-secret-scan` Gitleaks full history | 18 Nov | ✅ | ✅ | Gitleaks v8.30.1, `fetch-depth: 0` · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
+| M3-03 | `3-lint` (ESLint + ShellCheck), `4-format` (Prettier) | 19 Nov | ✅ | ✅ | ESLint ×2 + ShellCheck on scripts/, infra/, monitoring/ · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
+| M3-04 | `5-dockerfile-lint` Hadolint | 19 Nov | ✅ | ✅ | Hadolint v2.14.0, `--failure-threshold warning` · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
+| M3-05 | `6-unit-tests` Jest + coverage | 20 Nov | ✅ | ✅ | Jest ×2, coverage ≥ 80 % enforced, `coverage` artifact · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
+| M3-06 | `7-static-analysis` SonarCloud + quality gate | 20 Nov | ✅ | ✅ | SonarCloud CI scan, `sonar.qualitygate.wait=true`, gate passed · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
+| M3-07 | `8-dependency-scan` Snyk + `dependabot.yml` | 21 Nov | ✅ | ✅ | Snyk 1.1308.4 `--severity-threshold=high` ×2 + `.github/dependabot.yml` (npm ×2, docker ×2, actions) · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
+| M3-08 | `9-build-image` + image artifacts | 21 Nov | ✅ | ✅ | `docker save` → `images` artifact, pushed unchanged by job 11 · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
+| M3-09 | `10-image-scan` Trivy HIGH/CRITICAL | 21 Nov | ✅ | ✅ | Trivy 0.76.2 HIGH/CRITICAL, `--exit-code 1`, 0 findings · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
 | M3-10 | Branch protection with all required checks | 22 Nov | ⬜ | ⬜ | |
-| M3-11 | `SECURITY.md` | 22 Nov | ⬜ | ⬜ | |
-| M3-12 | PR template (+ CODEOWNERS) | 18 Nov | ⬜ | ⬜ | |
+| M3-11 | `SECURITY.md` | 22 Nov | ✅ | ⬜ | `SECURITY.md`: gates, secrets, hardening, accepted findings |
+| M3-12 | PR template (+ CODEOWNERS) | 18 Nov | ✅ | ⬜ | `.github/pull_request_template.md` + `.github/CODEOWNERS` |
 | M3-13 | `docs/VIVA.md` live-demo script, everyone rehearsed | 28 Nov | ⬜ | ⬜ | |
 | M3-14 | Architecture diagram (draft 20 Nov, final) | 28 Nov | ⬜ | ⬜ | |
 | M3-15 | Findings report + contribution table | 29 Nov | ⬜ | ⬜ | |
@@ -98,17 +98,17 @@ Tick your own initials when done.
 | M4-00 | AWS budget alert, IAM users + MFA, region us-east-1 | 17 Nov | ✅ | ⬜ | PR #1 (`00-budget.sh`, `00-team-users.sh`); 🚧 members confirm login + MFA |
 | M4-01 | VPC, 4 subnets, IGW, NAT, route tables | 19 Nov | ✅ | ✅ | PR #1 (`01-network.sh`, `nat.sh`); re-run creates nothing; IDs in infra/README §1–2 |
 | M4-02 | Security groups (no SSH) | 19 Nov | ✅ | ✅ | PR #1 (`02-security-groups.sh`); rules in infra/README §3 |
-| M4-03 | GitHub OIDC provider + CI role + deploy role | 20 Nov | ✅ | ⬜ | PR #1 (`03-iam.sh`); 🚧 needs a workflow on main to assume the role |
+| M4-03 | GitHub OIDC provider + CI role + deploy role | 20 Nov | ✅ | ✅ | OIDC roles assumed by job 11 (immutable subject `repo:hussainwaz@148036334/taskflow-devops@1460445754`) · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
 | M4-04 | EC2 role + instance profile | 20 Nov | ✅ | ✅ | PR #1 (`iam/ec2-*.json`); instance profile exists with the role |
 | M4-05 | RDS Postgres + Secrets Manager password | 21 Nov | ✅ | ✅ | `rds.sh`; not public, encrypted, db-sg only; reachable on 5432 from an app-sg instance (infra/README §7) |
 | M4-06 | SSM parameters for image tags | 21 Nov | ✅ | ✅ | `04-ssm-params.sh`; both params exist (`none`) |
-| M4-07 | `infra/user-data.sh` (with M2) | 22 Nov | ✅ | ⬜ | Host setup, secret, RDS reachability tested on a test instance (infra/README §7); 🚧 full `compose up` once M2 images + compose.prod exist |
+| M4-07 | `infra/user-data.sh` (with M2) | 22 Nov | ✅ | ✅ | ASG instances boot from SSM tag + compose file and serve `v1.0.15`; `scripts/smoke-test.sh` passed against the ALB (26 Nov) |
 | M4-08 | Launch template (IMDSv2, no key pair) | 22 Nov | ✅ | ✅ | `05-launch-template.sh`; test instance: no key, no public IP, IMDSv2 required |
 | M4-09 | ALB + 2 target groups + path routing | 23 Nov | ✅ | ✅ | `06-target-groups.sh`, `alb.sh`; `/`→frontend, `/api/*`→backend, both TGs healthy (infra/README §8–9) |
 | M4-10 | ASG (min 2, 2 AZs, target tracking) | 23 Nov | ✅ | ✅ | `asg.sh`; 2 InService in 1a + 1b; instance-kill recovery ~1m50s (infra/README §9) |
 | M4-11 | SSM Session Manager works, SSH impossible | 23 Nov | ✅ | ⬜ | SSM Online, no key/no :22; 🚧 console screenshot of a session |
-| M4-12 | Live link in README + `ALB_URL` variable | 23 Nov | ⬜ | ⬜ | `alb.sh up` sets `ALB_URL` automatically; 🚧 final link once the real app is deployed |
-| M4-13 | `infra/README.md` complete (rebuild + teardown) | 28 Nov | ⬜ | ⬜ | |
+| M4-12 | Live link in README + `ALB_URL` variable | 23 Nov | ✅ | ✅ | http://taskflow-alb-466982077.us-east-1.elb.amazonaws.com in README + GitHub variable `ALB_URL` |
+| M4-13 | `infra/README.md` complete (rebuild + teardown) | 28 Nov | ✅ | ✅ | `infra/README.md` + root README network design / deploy / teardown (PR #5) |
 | M4-14 | Cost control, everything up until grading | ongoing | ⬜ | ⬜ | |
 | M4-15 | Post-incident note (after D-07) | 28 Nov | ⬜ | ⬜ | |
 
