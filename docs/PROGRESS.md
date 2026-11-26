@@ -13,7 +13,7 @@
 |------|-------|--------------|
 | Member setup | Each member | 0 / 3 |
 | App, tests & monitoring | M1 | 8 / 14 |
-| Containers, scripts, CD & PDF | M2 | 5 / 15 |
+| Containers, scripts, CD & PDF | M2 | 7 / 15 |
 | CI, DevSecOps, diagram & report | M3 | 0 / 16 |
 | AWS infra & incident note | M4 | 8 / 16 |
 | Demos | Whole team | 0 / 7 |
@@ -60,13 +60,13 @@ Tick your own initials when done.
 | M2-04 | `scripts/build-and-test.sh` | 20 Nov | ✅ | ✅ | PR #7: ShellCheck clean · passes on both services · exits 1 and names the step when a unit test fails (output in PR) |
 | M2-05 | `scripts/healthcheck.sh` | 20 Nov | ✅ | ✅ | PR #7: ShellCheck clean · exit 0 vs local Compose · exit 1 for a dead URL · exit 2 on bad args (output in PR) |
 | M2-06 | `scripts/smoke-test.sh` | 21 Nov | ✅ | ✅ | PR #7: ShellCheck clean · passes vs local Compose · fails when backend stopped or version mismatches (output in PR) |
-| M2-07 | ECR repos (immutable tags, scan on push, lifecycle) | 21 Nov | ⬜ | ⬜ | |
-| M2-08 | `docker-compose.prod.yml` (ECR images, awslogs, env file) | 22 Nov | ⬜ | ⬜ | |
+| M2-07 | ECR repos (immutable tags, scan on push, lifecycle) | 21 Nov | ✅ | ✅ | PR #8: created 25 Nov in 627551519533 (CloudShell, same settings as `scripts/aws-ecr-logs.sh`): IMMUTABLE, scan on push, AES256, keep newest 20 · `docs/evidence/M2-07-01-ecr-repos-console.jpg`, `M2-07-02-ecr-logs-cli-verify.jpg` |
+| M2-08 | `docker-compose.prod.yml` (ECR images, awslogs, env file) | 22 Nov | ✅ | ⬜ | PR #8: `compose config` valid, 1.4 KB (fits SSM), smoke test passes locally with awslogs swapped for json-file; 🚧 EC2 test instance with M4 |
 | M2-09 | Job `11-push-image` (OIDC, SHA + semver tags) | 23 Nov | ⬜ | ⬜ | |
-| M2-10 | `scripts/deploy.sh` | 24 Nov | ⬜ | ⬜ | |
+| M2-10 | `scripts/deploy.sh` | 24 Nov | ✅ | ⬜ | PR #8: ShellCheck clean · 7 cases vs a fake aws CLI (deploy, missing tag, failed refresh, waits for running refresh, timeout cancel, rollback, bad tag), output in PR; 🚧 real refresh |
 | M2-11 | Job `12-deploy` + auto-rollback | 25 Nov | ⬜ | ⬜ | |
 | M2-12 | `rollback.yml` manual workflow | 26 Nov | ⬜ | ⬜ | |
-| M2-13 | Log groups + 7-day retention | 22 Nov | ⬜ | ⬜ | |
+| M2-13 | Log groups + 7-day retention | 22 Nov | ✅ | ✅ | PR #8: `/taskflow/backend` + `/taskflow/frontend`, 7-day retention, created 25 Nov · `docs/evidence/M2-13-01-log-groups-console.jpg`, `M2-07-02-ecr-logs-cli-verify.jpg`; CloudWatch log lines from EC2 follow with the first deploy |
 | M2-14 | Root README final (run / deploy / teardown / links) | 29 Nov | ⬜ | ⬜ | |
 | M2-15 | `GroupX.pdf` assembled and submitted | 30 Nov | ⬜ | ⬜ | |
 
