@@ -130,9 +130,12 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         with:
+          # PRs are analysed as branches: the SonarCloud project is still bound to the repo's old GitHub
+          # owner, so PR lookups fail. Branch analysis needs no binding and still gates new code vs main.
           args: >
             -Dsonar.qualitygate.wait=true
             -Dsonar.qualitygate.timeout=300
+            ${{ github.event_name == 'pull_request' && format('-Dsonar.branch.name={0} -Dsonar.newCode.referenceBranch=main', github.head_ref) || '' }}
 
   dependency-scan:
     name: 8-dependency-scan
