@@ -12,11 +12,11 @@
 | Area | Owner | Done / total |
 |------|-------|--------------|
 | Member setup | Each member | 0 / 3 |
-| App, tests & monitoring | M1 | 8 / 14 |
-| Containers, scripts, CD & PDF | M2 | 9 / 15 |
+| App, tests & monitoring | M1 | 11 / 14 |
+| Containers, scripts, CD & PDF | M2 | 12 / 15 |
 | CI, DevSecOps, diagram & report | M3 | 10 / 16 |
-| AWS infra & incident note | M4 | 12 / 16 |
-| Demos | Whole team | 0 / 7 |
+| AWS infra & incident note | M4 | 13 / 16 |
+| Demos | Whole team | 5 / 7 |
 | Submission | Whole team | 0 / 12 |
 
 ---
@@ -43,11 +43,11 @@ Tick your own initials when done.
 | M1-06 | Coverage ≥ 80% enforced, lcov for Sonar | 21 Nov | ✅ | ✅ | `coverageThreshold: 80` + `coverage/lcov.info` in both `jest.config.js` (96%+ backend, 91%+ frontend) |
 | M1-07 | JSON request logging | 22 Nov | ✅ | ✅ | `src/logger.js` emits `{"level","msg","method","path","status","duration_ms"}` JSON lines; unit + container log verified |
 | M1-08 | `APP_VERSION` in health response | 22 Nov | ✅ | ✅ | `GET /api/health` returns `APP_VERSION` (unit tested + container tested with `v1.0.99`) |
-| M1-09 | k6 load test script + README | 25 Nov | ✅ | ⬜ | `loadtest/load.js` + `loadtest/README.md`; local `grafana/k6` smoke run passed (0% failed); 🚧 live ALB scale-out run in D-04 |
+| M1-09 | k6 load test script + README | 25 Nov | ✅ | ✅ | `loadtest.yml` (k6 2.3.0 on Actions): 400 VUs, 4.35 M req @ 4.5 k/s, 0.00 % failed, p95 98 ms, ASG 2→4 · [run](https://github.com/hussainwaz/taskflow-devops/actions/runs/45887496574) |
 | M1-10 | CloudWatch agent config (memory) | 23 Nov | ✅ | ⬜ | `monitoring/cloudwatch-agent.json` uploaded to SSM `/taskflow/prod/cloudwatch-agent` (v1, `627551519533`); 🚧 verify `mem_used_percent` on EC2 boot |
 | M1-11 | SNS topic + all members subscribed | 23 Nov | ✅ | ⬜ | `taskflow-alerts` created in `627551519533` + all 4 `@lhr.nu.edu.pk` emails subscribed; 🚧 members confirm email + test publish |
-| M1-12 | Dashboard + `monitoring/dashboard.json` | 24 Nov | ✅ | ⬜ | `taskflow-dashboard` created in CloudWatch (`ASG` + `CWAgent` live); 🚧 re-run `setup-monitoring.sh up` after `infra/up.sh` to attach ALB widgets + screenshot |
-| M1-13 | ≥ 2 alarms, each tested | 24 Nov | ✅ | ⬜ | `taskflow-high-cpu` live + `monitoring/alarms.md` + 3 ALB/TG alarms in `setup-monitoring.sh`; 🚧 run after `infra/up.sh` & trigger each (`D-07`) |
+| M1-12 | Dashboard + `monitoring/dashboard.json` | 24 Nov | ✅ | ✅ | `taskflow-dashboard` re-run after `infra/up.sh` (ALB + TG widgets live) · `monitoring/dashboard.json` exported |
+| M1-13 | ≥ 2 alarms, each tested | 24 Nov | ✅ | ✅ | 4 alarms; `taskflow-backend-5xx` fired + cleared in D-07, `unhealthy-*` fired during deploys/instance kill; SNS emails received |
 | M1-14 | App README section + lessons for report | 29 Nov | ✅ | ⬜ | Added `Application, Testing & Monitoring` to root `README.md`; 🚧 add final lessons learned to `report.md` after demos |
 
 ## Member 2 — Containers, shell scripts, CD, README & PDF
@@ -63,9 +63,9 @@ Tick your own initials when done.
 | M2-07 | ECR repos (immutable tags, scan on push, lifecycle) | 21 Nov | ✅ | ✅ | PR #8: created 25 Nov in 627551519533 (CloudShell, same settings as `scripts/aws-ecr-logs.sh`): IMMUTABLE, scan on push, AES256, keep newest 20 · `docs/evidence/M2-07-01-ecr-repos-console.jpg`, `M2-07-02-ecr-logs-cli-verify.jpg` |
 | M2-08 | `docker-compose.prod.yml` (ECR images, awslogs, env file) | 22 Nov | ✅ | ✅ | In SSM `/taskflow/prod/compose_file`; instances run it with awslogs (fixed `{{.ID}}` tag that SSM rejects) |
 | M2-09 | Job `11-push-image` (OIDC, SHA + semver tags) | 23 Nov | ✅ | ✅ | `v1.0.15` + full SHA tags in both ECR repos · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
-| M2-10 | `scripts/deploy.sh` | 24 Nov | ✅ | ⬜ | PR #8: ShellCheck clean · 7 cases vs a fake aws CLI (deploy, missing tag, failed refresh, waits for running refresh, timeout cancel, rollback, bad tag), output in PR; 🚧 real refresh |
-| M2-11 | Job `12-deploy` + auto-rollback | 25 Nov | ✅ | ⬜ | PR #9: `deploy.yml` (reusable, called by job 12): deploy.sh → smoke-test.sh → auto-rollback · actionlint clean; 🚧 needs a bad build on AWS |
-| M2-12 | `rollback.yml` manual workflow | 26 Nov | ✅ | ⬜ | PR #9: `rollback.yml` (verify tag in ECR → same deploy + smoke) · actionlint clean; 🚧 run it once on AWS |
+| M2-10 | `scripts/deploy.sh` | 24 Nov | ✅ | ✅ | Real instance refreshes in deploy [run](https://github.com/hussainwaz/taskflow-devops/actions/runs/45879965344) and rollback [run](https://github.com/hussainwaz/taskflow-devops/actions/runs/45881326487) |
+| M2-11 | Job `12-deploy` + auto-rollback | 25 Nov | ✅ | ✅ | Push to main auto-deployed v1.0.17 and v1.0.18, smoke test passed · [run](https://github.com/hussainwaz/taskflow-devops/actions/runs/45879965344) |
+| M2-12 | `rollback.yml` manual workflow | 26 Nov | ✅ | ✅ | `rollback.yml` v1.0.17 → v1.0.15, smoke test passed · [run](https://github.com/hussainwaz/taskflow-devops/actions/runs/45881326487) |
 | M2-13 | Log groups + 7-day retention | 22 Nov | ✅ | ✅ | PR #8: `/taskflow/backend` + `/taskflow/frontend`, 7-day retention, created 25 Nov · `docs/evidence/M2-13-01-log-groups-console.jpg`, `M2-07-02-ecr-logs-cli-verify.jpg`; CloudWatch log lines from EC2 follow with the first deploy |
 | M2-14 | Root README final (run / deploy / teardown / links) | 29 Nov | ⬜ | ⬜ | |
 | M2-15 | `GroupX.pdf` assembled and submitted | 30 Nov | ⬜ | ⬜ | |
@@ -87,9 +87,9 @@ Tick your own initials when done.
 | M3-10 | Branch protection with all required checks | 22 Nov | ⬜ | ⬜ | |
 | M3-11 | `SECURITY.md` | 22 Nov | ✅ | ⬜ | `SECURITY.md`: gates, secrets, hardening, accepted findings |
 | M3-12 | PR template (+ CODEOWNERS) | 18 Nov | ✅ | ⬜ | `.github/pull_request_template.md` + `.github/CODEOWNERS` |
-| M3-13 | `docs/VIVA.md` live-demo script, everyone rehearsed | 28 Nov | ⬜ | ⬜ | |
+| M3-13 | `docs/VIVA.md` live-demo script, everyone rehearsed | 28 Nov | ✅ | ⬜ | `docs/VIVA.md`; 🚧 every member runs it once |
 | M3-14 | Architecture diagram (draft 20 Nov, final) | 28 Nov | ⬜ | ⬜ | |
-| M3-15 | Findings report + contribution table | 29 Nov | ⬜ | ⬜ | |
+| M3-15 | Findings report + contribution table | 29 Nov | ✅ | ⬜ | `docs/submission/report.md` drafted; 🚧 each member approves their contribution row |
 
 ## Member 4 — AWS infrastructure, IAM, networking & incident note
 
@@ -105,12 +105,12 @@ Tick your own initials when done.
 | M4-07 | `infra/user-data.sh` (with M2) | 22 Nov | ✅ | ✅ | ASG instances boot from SSM tag + compose file and serve `v1.0.15`; `scripts/smoke-test.sh` passed against the ALB (26 Nov) |
 | M4-08 | Launch template (IMDSv2, no key pair) | 22 Nov | ✅ | ✅ | `05-launch-template.sh`; test instance: no key, no public IP, IMDSv2 required |
 | M4-09 | ALB + 2 target groups + path routing | 23 Nov | ✅ | ✅ | `06-target-groups.sh`, `alb.sh`; `/`→frontend, `/api/*`→backend, both TGs healthy (infra/README §8–9) |
-| M4-10 | ASG (min 2, 2 AZs, target tracking) | 23 Nov | ✅ | ✅ | `asg.sh`; 2 InService in 1a + 1b; instance-kill recovery ~1m50s (infra/README §9) |
+| M4-10 | ASG (min 2, 2 AZs, target tracking) | 23 Nov | ✅ | ✅ | 2 AZs, min 2/max 4, CPU 50 % target tracking: scaled 2→4 under load (D-04); instance kill replaced automatically (D-03) |
 | M4-11 | SSM Session Manager works, SSH impossible | 23 Nov | ✅ | ⬜ | SSM Online, no key/no :22; 🚧 console screenshot of a session |
 | M4-12 | Live link in README + `ALB_URL` variable | 23 Nov | ✅ | ✅ | http://taskflow-alb-466982077.us-east-1.elb.amazonaws.com in README + GitHub variable `ALB_URL` |
 | M4-13 | `infra/README.md` complete (rebuild + teardown) | 28 Nov | ✅ | ✅ | `infra/README.md` + root README network design / deploy / teardown (PR #5) |
-| M4-14 | Cost control, everything up until grading | ongoing | ⬜ | ⬜ | |
-| M4-15 | Post-incident note (after D-07) | 28 Nov | ⬜ | ⬜ | |
+| M4-14 | Cost control, everything up until grading | ongoing | ✅ | ⬜ | Paid layer scripted up/down (`infra/up.sh`/`down.sh`); stays up from now until grading |
+| M4-15 | Post-incident note (after D-07) | 28 Nov | ✅ | ✅ | `docs/incidents/2026-11-26-db-unreachable.md` |
 
 
 ## Demos & evidence — whole team together, Fri 27 / Sat 28 Nov
@@ -119,13 +119,13 @@ No owners: the team runs these together and rotates who drives (details in [WORK
 
 | ID | Demo | Driven by | Done | Screenshots saved |
 |----|------|-----------|------|-------------------|
-| D-01 | CI run, jobs 2–10 separate | | ⬜ | ⬜ |
+| D-01 | CI run, jobs 2–10 separate | Amar (CLI) — pipeline run 45879965344 | ✅ | ⬜ |
 | D-02 | Security stage blocks a PR | | ⬜ | ⬜ |
-| D-03 | Instance terminated → stays up → recovers | | ⬜ | ⬜ |
-| D-04 | Load test → scale-out → scale-in | | ⬜ | ⬜ |
-| D-05 | Commit auto-deployed + rollback | | ⬜ | ⬜ |
+| D-03 | Instance terminated → stays up → recovers | Amar (CLI) — instance kill 26 Nov 19:13 UTC | ✅ | ⬜ |
+| D-04 | Load test → scale-out → scale-in | Amar (CLI) — loadtest run 45887496574 | ✅ | ⬜ |
+| D-05 | Commit auto-deployed + rollback | Amar (CLI) — deploy 45879965344 + rollback 45881326487 | ✅ | ⬜ |
 | D-06 | Multi-AZ, OIDC trust, ECR tags, branch protection | | ⬜ | ⬜ |
-| D-07 | Deliberate failure → alarm → fix → note | | ⬜ | ⬜ |
+| D-07 | Deliberate failure → alarm → fix → note | Amar (CLI) — incident 26 Nov 19:27 UTC | ✅ | ⬜ |
 
 ## Final submission checklist — Sun 29 / Mon 30 Nov
 
