@@ -1,0 +1,109 @@
+# Pipeline stage 11 (M2-09): push the images built in stage 9 and scanned in stage 10 to ECR.
+# Reusable: pipeline.yml calls it from the job named "11-push-image", on push to main only:
+#
+#   push-image:
+#     name: 11-push-image
+#     needs: <job id of 10-image-scan>
+#     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+#     permissions: { contents: read, id-token: write }
+#     uses: ./.github/workflows/push-image.yml
+#
+# Artifact contract with stage 9: one artifact (default name "images") holding one `docker save`
+# tar per service, each saved with a name that contains taskflow-backend / taskflow-frontend
+# (e.g. taskflow-backend:ci). The exact scanned images are pushed, never rebuilt.
+# Tags (ARCHITECTURE §3.4): full git SHA and v<VERSION>.<run_number>, e.g. v1.0.42.
+name: push-image
+
+on:
+  workflow_call:
+    inputs:
+      artifact-name:
+        description: Name of the artifact job 9 uploads
+        type: string
+        default: images
+    outputs:
+      image-tag:
+        description: Version tag pushed for both services, e.g. v1.0.42
+        value: ${{ jobs.push.outputs.image-tag }}
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  push:
+    name: push to ECR
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      image-tag: ${{ steps.tags.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: VERSION
+          sparse-checkout-cone-mode: false
+
+      - name: Work out tags
+        id: tags
+        run: |
+          version="v$(tr -d '[:space:]' < VERSION).${GITHUB_RUN_NUMBER}"
+          [[ "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "::error::VERSION must be major.minor, got $version"; exit 1; }
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Tags: $GITHUB_SHA and $version"
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: images
+
+      - name: Load the scanned images
+        env:
+          ARTIFACT: ${{ inputs.artifact-name }}
+        run: |
+          shopt -s nullglob
+          for tar in images/*.tar; do
+            while read -r ref; do
+              case "$ref" in
+                *taskflow-backend*) echo "$ref" > images/backend.ref ;;
+                *taskflow-frontend*) echo "$ref" > images/frontend.ref ;;
+              esac
+            done < <(docker load -i "$tar" | sed -n 's/^Loaded image: //p')
+          done
+          for svc in backend frontend; do
+            [[ -s "images/$svc.ref" ]] || { echo "::error::no taskflow-$svc image in artifact '$ARTIFACT' (see contract at the top of push-image.yml)"; exit 1; }
+            echo "$svc: $(cat "images/$svc.ref")"
+          done
+
+      - uses: aws-actions/configure-aws-credentials@45666896f5d8e0f10ae255413f3a4cdd03bdc8f5 # v6
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/taskflow-github-ci-role
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - uses: aws-actions/amazon-ecr-login@7290e214a610b32bc0eef81748948b6d466a8783 # v2
+        id: ecr
+
+      - name: Tag and push (SHA + version)
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          VERSION_TAG: ${{ steps.tags.outputs.version }}
+        run: |
+          for svc in backend frontend; do
+            repo="taskflow-$svc"
+            src="$(cat "images/$svc.ref")"
+            for tag in "$GITHUB_SHA" "$VERSION_TAG"; do
+              # Tags are immutable in ECR: a re-run must not fail on a tag it already pushed.
+              if aws ecr describe-images --repository-name "$repo" --image-ids "imageTag=$tag" >/dev/null 2>&1; then
+                echo "$repo:$tag already in ECR, skipped"
+                continue
+              fi
+              docker tag "$src" "$REGISTRY/$repo:$tag"
+              docker push --quiet "$REGISTRY/$repo:$tag"
+            done
+            echo "| $repo | \`$VERSION_TAG\` | \`$GITHUB_SHA\` |" >> pushed.md
+          done
+          {
+            echo "### Pushed to ECR"
+            echo "| Repository | Version | Commit |"
+            echo "|---|---|---|"
+            cat pushed.md
+          } >> "$GITHUB_STEP_SUMMARY"

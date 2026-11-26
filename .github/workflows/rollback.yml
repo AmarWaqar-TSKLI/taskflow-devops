@@ -1,0 +1,62 @@
+# Manual rollback (M2-12): Actions -> Rollback -> Run workflow on main -> image tag, e.g. v1.0.40.
+# Checks the tag exists in both ECR repos, then runs the same deploy + smoke test as stage 12.
+# If the smoke test fails on the old tag too, it puts back what was live and the run fails.
+# Notes: it uses docker-compose.prod.yml and scripts from main, with the old images. Don't start it
+# while a pipeline deploy is queued: deploys share one concurrency group and GitHub keeps only one
+# pending run per group, so the newer one cancels the waiting one.
+name: Rollback
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: Image tag to roll back to (e.g. v1.0.40)
+        type: string
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify-tag:
+    name: verify tag in ECR
+    if: github.ref == 'refs/heads/main' # the AWS roles trust main only
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      IMAGE_TAG: ${{ inputs.image_tag }}
+    steps:
+      - name: Check tag format
+        run: |
+          [[ "$IMAGE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ || "$IMAGE_TAG" =~ ^[0-9a-f]{40}$ ]] ||
+            { echo "::error::'$IMAGE_TAG' is not a version tag (v1.0.40) or a full git SHA"; exit 1; }
+
+      - uses: aws-actions/configure-aws-credentials@45666896f5d8e0f10ae255413f3a4cdd03bdc8f5 # v6
+        with:
+          role-to-assume: arn:aws:iam::${{ vars.AWS_ACCOUNT_ID }}:role/taskflow-github-deploy-role
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Tag exists in both repos
+        run: |
+          echo "### Rollback to $IMAGE_TAG" >> "$GITHUB_STEP_SUMMARY"
+          for repo in taskflow-backend taskflow-frontend; do
+            if ! pushed="$(aws ecr describe-images --repository-name "$repo" --image-ids "imageTag=$IMAGE_TAG" \
+                --query 'imageDetails[0].imagePushedAt' --output text 2>&1)"; then
+              echo "::error::$repo:$IMAGE_TAG not found in ECR ($pushed)"
+              exit 1
+            fi
+            echo "- $repo:$IMAGE_TAG pushed $pushed" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+
+  rollback:
+    name: rollback
+    needs: verify-tag
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/deploy.yml
+    with:
+      image-tag: ${{ inputs.image_tag }}
