@@ -1,0 +1,159 @@
+{
+  "widgets": [
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 0,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "ALB Request Rate (req/min)",
+        "region": "us-east-1",
+        "stat": "Sum",
+        "period": 60,
+        "metrics": [
+          [
+            "AWS/ApplicationELB",
+            "RequestCount",
+            "LoadBalancer",
+            "app/taskflow-alb/<replaced-by-setup-monitoring>"
+          ]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 0,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "5xx Errors (Target & ELB)",
+        "region": "us-east-1",
+        "stat": "Sum",
+        "period": 60,
+        "metrics": [
+          [
+            "AWS/ApplicationELB",
+            "HTTPCode_Target_5XX_Count",
+            "LoadBalancer",
+            "app/taskflow-alb/<replaced-by-setup-monitoring>"
+          ],
+          [".", "HTTPCode_ELB_5XX_Count", ".", "."]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 6,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "Latency (p50 / p95 / p99)",
+        "region": "us-east-1",
+        "period": 60,
+        "metrics": [
+          [
+            "AWS/ApplicationELB",
+            "TargetResponseTime",
+            "LoadBalancer",
+            "app/taskflow-alb/<replaced-by-setup-monitoring>",
+            { "stat": "p50", "label": "p50" }
+          ],
+          ["...", { "stat": "p95", "label": "p95" }],
+          ["...", { "stat": "p99", "label": "p99" }]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 6,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "Target Health (Healthy / UnHealthy Hosts)",
+        "region": "us-east-1",
+        "stat": "Average",
+        "period": 60,
+        "metrics": [
+          [
+            "AWS/ApplicationELB",
+            "HealthyHostCount",
+            "TargetGroup",
+            "targetgroup/taskflow-tg-frontend/<id>",
+            "LoadBalancer",
+            "app/taskflow-alb/<replaced-by-setup-monitoring>",
+            { "label": "frontend healthy" }
+          ],
+          [
+            ".",
+            "HealthyHostCount",
+            "TargetGroup",
+            "targetgroup/taskflow-tg-backend/<id>",
+            "LoadBalancer",
+            "app/taskflow-alb/<replaced-by-setup-monitoring>",
+            { "label": "backend healthy" }
+          ],
+          [
+            ".",
+            "UnHealthyHostCount",
+            "TargetGroup",
+            "targetgroup/taskflow-tg-frontend/<id>",
+            "LoadBalancer",
+            "app/taskflow-alb/<replaced-by-setup-monitoring>",
+            { "label": "frontend unhealthy" }
+          ],
+          [
+            ".",
+            "UnHealthyHostCount",
+            "TargetGroup",
+            "targetgroup/taskflow-tg-backend/<id>",
+            "LoadBalancer",
+            "app/taskflow-alb/<replaced-by-setup-monitoring>",
+            { "label": "backend unhealthy" }
+          ]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 0,
+      "y": 12,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "ASG CPU Utilization (%)",
+        "region": "us-east-1",
+        "stat": "Average",
+        "period": 60,
+        "metrics": [
+          ["AWS/EC2", "CPUUtilization", "AutoScalingGroupName", "taskflow-asg"]
+        ]
+      }
+    },
+    {
+      "type": "metric",
+      "x": 12,
+      "y": 12,
+      "width": 12,
+      "height": 6,
+      "properties": {
+        "title": "EC2 Memory & Disk Utilization (%)",
+        "region": "us-east-1",
+        "stat": "Average",
+        "period": 60,
+        "metrics": [
+          [
+            "CWAgent",
+            "mem_used_percent",
+            "AutoScalingGroupName",
+            "taskflow-asg"
+          ],
+          [".", "disk_used_percent", ".", "."]
+        ]
+      }
+    }
+  ]
+}

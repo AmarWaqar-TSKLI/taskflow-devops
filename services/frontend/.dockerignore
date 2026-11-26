@@ -1,0 +1,14 @@
+# Keep the build context small and free of secrets.
+.git
+node_modules
+dist
+coverage
+tests
+**/*.test.js
+.env
+.env.*
+*.md
+Dockerfile
+.dockerignore
+.eslintcache
+npm-debug.log*
