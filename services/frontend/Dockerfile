@@ -4,7 +4,7 @@
 # Stage 1 bundles the static site with esbuild (`npm run build` -> dist/, including index.html).
 # Stage 2 serves dist/ with nginx-unprivileged on 8080 as uid 101; no node, no npm in the final image.
 
-FROM node:24.22.3-alpine3.24 AS build
+FROM node:26.13.1-alpine3.24 AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts && npm cache clean --force
