@@ -1,0 +1,12 @@
+# Owners by area (docs/WORK.md)
+/services/        @Haseebahmad22
+/loadtest/        @Haseebahmad22
+/monitoring/      @Haseebahmad22
+/services/*/Dockerfile @hussainwaz
+/docker-compose*.yml   @hussainwaz
+/scripts/         @hussainwaz
+/.github/         @slider79
+/SECURITY.md      @slider79
+/sonar-project.properties @slider79
+/infra/           @AmarWaqar-TSKLI
+/docs/incidents/  @AmarWaqar-TSKLI
