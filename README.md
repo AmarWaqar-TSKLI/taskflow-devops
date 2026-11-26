@@ -137,6 +137,15 @@ It deletes in dependency order: ASG, launch template, ALB, target groups, RDS, s
 VPC (security groups, route tables, subnets, IGW), ECR repos, log groups, SSM parameters, alarms,
 dashboard, SNS topic, IAM roles and the OIDC provider. Then check AWS Billing for anything left running.
 
+## Application, Testing & Monitoring (`M1`)
+
+- **Backend ([services/backend/](services/backend/README.md)):** Node + Express API layered as `routes -> service -> repository` (`pg`), auto-creating the `tasks` table on startup and connecting to RDS over verified TLS (`aws-ssl-profiles`). Emits single-line JSON request logs (`level`, `msg`, `method`, `path`, `status`, `duration_ms`) to stdout for CloudWatch `awslogs`.
+  - Endpoints: `GET /api/health` (liveness only, returns `APP_VERSION`), `GET/POST/PATCH/DELETE /api/tasks`.
+- **Frontend ([services/frontend/](services/frontend/README.md)):** Vanilla JS + static HTML bundled with `esbuild` into `dist/`, calling relative `/api/...` endpoints with XSS-safe DOM rendering.
+- **Tests & coverage:** Jest (`supertest` + `jsdom`), ESLint, and Prettier in both services with an enforced **≥ 80%** global coverage threshold and `coverage/lcov.info` output.
+- **Load test ([loadtest/](loadtest/README.md)):** `loadtest/load.js` (k6) ramps traffic against `$BASE_URL` to drive ASG CPU past the 50% scale-out threshold and back down for scale-in verification.
+- **Monitoring ([monitoring/](monitoring/README.md)):** CloudWatch Agent config (`/taskflow/prod/cloudwatch-agent`), SNS topic `taskflow-alerts`, dashboard `taskflow-dashboard`, and alarms (`taskflow-unhealthy-frontend`, `taskflow-unhealthy-backend`, `taskflow-backend-5xx`, `taskflow-high-cpu`) provisioned via `monitoring/setup-monitoring.sh`.
+
 ## Links (fill in)
 
 | What | Link |
