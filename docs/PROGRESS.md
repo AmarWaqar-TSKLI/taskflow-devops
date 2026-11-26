@@ -12,7 +12,7 @@
 | Area | Owner | Done / total |
 |------|-------|--------------|
 | Member setup | Each member | 0 / 3 |
-| App, tests & monitoring | M1 | 0 / 14 |
+| App, tests & monitoring | M1 | 2 / 14 |
 | Containers, scripts, CD & PDF | M2 | 0 / 15 |
 | CI, DevSecOps, diagram & report | M3 | 0 / 16 |
 | AWS infra & incident note | M4 | 8 / 16 |
@@ -27,16 +27,16 @@ Tick your own initials when done.
 
 | ID | Task | M1 | M2 | M3 | M4 |
 |----|------|----|----|----|----|
-| T-01 | Your row in the Team table filled | ⬜ | ⬜ | ⬜ | ⬜ |
-| T-02 | Tools installed | ⬜ | ⬜ | ⬜ | ⬜ |
-| T-03 | Docs read | ⬜ | ⬜ | ⬜ | ⬜ |
+| T-01 | Your row in the Team table filled | ✅ | ⬜ | ⬜ | ⬜ |
+| T-02 | Tools installed | ✅ | ⬜ | ⬜ | ⬜ |
+| T-03 | Docs read | ✅ | ⬜ | ⬜ | ⬜ |
 
 ## Member 1 — Application, tests, load test & monitoring
 
 | ID | Task | Due | Built | Tested | Proof |
 |----|------|-----|-------|--------|-------|
-| M1-01 | Backend skeleton + `/api/health` + Jest/ESLint/Prettier | 17 Nov | ⬜ | ⬜ | |
-| M1-02 | Frontend skeleton + esbuild + Jest/ESLint/Prettier | 18 Nov | ⬜ | ⬜ | |
+| M1-01 | Backend skeleton + `/api/health` + Jest/ESLint/Prettier | 17 Nov | ✅ | ✅ | `npm test` (2/2 health tests, 100% cov), `npm run lint`, `npm run format:check` |
+| M1-02 | Frontend skeleton + esbuild + Jest/ESLint/Prettier | 18 Nov | ✅ | ✅ | `npm run build` (`dist/`), `npm test` (jsdom), `npm run lint`, `npm run format:check` |
 | M1-03 | Tasks API CRUD (tests first, 400/404 covered) | 20 Nov | ⬜ | ⬜ | |
 | M1-04 | Postgres repository + env config + auto-create table | 20 Nov | ⬜ | ⬜ | |
 | M1-05 | Frontend task UI + tests | 21 Nov | ⬜ | ⬜ | |

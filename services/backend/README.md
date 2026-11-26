@@ -5,6 +5,7 @@
 Node 24 + Express API. Contract: [docs/ARCHITECTURE.md §3.2–3.3](../../docs/ARCHITECTURE.md#32-http-api-backend-all-under-api).
 
 ## Planned layout
+
 ```
 backend/
 ├── src/
@@ -24,6 +25,7 @@ backend/
 ```
 
 ## Commands
+
 ```bash
 npm ci
 npm test              # jest --coverage

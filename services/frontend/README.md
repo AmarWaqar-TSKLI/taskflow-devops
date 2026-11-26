@@ -10,6 +10,7 @@ Static HTML + vanilla JS, bundled with esbuild, served by `nginx-unprivileged` o
   - on AWS the ALB routes `/api/*` to the backend target group
 
 ## Planned layout
+
 ```
 frontend/
 ├── index.html
