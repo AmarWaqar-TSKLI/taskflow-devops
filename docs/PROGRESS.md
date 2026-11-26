@@ -13,7 +13,7 @@
 |------|-------|--------------|
 | Member setup | Each member | 0 / 3 |
 | App, tests & monitoring | M1 | 8 / 14 |
-| Containers, scripts, CD & PDF | M2 | 3 / 15 |
+| Containers, scripts, CD & PDF | M2 | 5 / 15 |
 | CI, DevSecOps, diagram & report | M3 | 0 / 16 |
 | AWS infra & incident note | M4 | 8 / 16 |
 | Demos | Whole team | 0 / 7 |
@@ -57,9 +57,9 @@ Tick your own initials when done.
 | M2-01 | Backend Dockerfile + .dockerignore | 18 Nov | ✅ | ✅ | PR #6: Hadolint clean · `id` = uid 1000 (node) · Trivy HIGH/CRITICAL 0 · healthy in Compose (hello-world app until M1-01 lands) |
 | M2-02 | Frontend Dockerfile + nginx.conf + .dockerignore | 18 Nov | ✅ | ✅ | PR #6: Hadolint clean · `id` = uid 101 (nginx) · `/health` 200 · `/api/` proxied · Trivy HIGH/CRITICAL 0 (hello-world app) |
 | M2-03 | `docker-compose.yml` + `.env.example` + "Run locally" README | 19 Nov | ✅ | ⬜ | PR #6: `docker compose up --build` → 3 healthy, CRUD via :8080 (hello-world app); 🚧 re-test from a fresh clone once M1's app is on main |
-| M2-04 | `scripts/build-and-test.sh` | 20 Nov | ⬜ | ⬜ | |
-| M2-05 | `scripts/healthcheck.sh` | 20 Nov | ⬜ | ⬜ | |
-| M2-06 | `scripts/smoke-test.sh` | 21 Nov | ⬜ | ⬜ | |
+| M2-04 | `scripts/build-and-test.sh` | 20 Nov | ✅ | ✅ | PR #7: ShellCheck clean · passes on both services · exits 1 and names the step when a unit test fails (output in PR) |
+| M2-05 | `scripts/healthcheck.sh` | 20 Nov | ✅ | ✅ | PR #7: ShellCheck clean · exit 0 vs local Compose · exit 1 for a dead URL · exit 2 on bad args (output in PR) |
+| M2-06 | `scripts/smoke-test.sh` | 21 Nov | ✅ | ✅ | PR #7: ShellCheck clean · passes vs local Compose · fails when backend stopped or version mismatches (output in PR) |
 | M2-07 | ECR repos (immutable tags, scan on push, lifecycle) | 21 Nov | ⬜ | ⬜ | |
 | M2-08 | `docker-compose.prod.yml` (ECR images, awslogs, env file) | 22 Nov | ⬜ | ⬜ | |
 | M2-09 | Job `11-push-image` (OIDC, SHA + semver tags) | 23 Nov | ⬜ | ⬜ | |
