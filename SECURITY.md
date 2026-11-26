@@ -49,7 +49,7 @@ digest, so a moved tag cannot change what runs in CI.
 
 | Tool | Finding | Why accepted | Revisit |
 |------|---------|--------------|---------|
-| — | none so far | | |
+| SonarCloud `shell:S5332` | `infra/alb.sh` prints/stores the ALB URL as `http://` | No domain name, so no ACM certificate for an HTTPS listener. Traffic inside AWS is private-subnet only. Suppressed in `sonar-project.properties` | If a domain is added |
 
 Any finding a gate flags is either fixed or added to this table with a reason, never silently skipped.
 

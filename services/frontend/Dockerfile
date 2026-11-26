@@ -7,7 +7,7 @@
 FROM node:24.22.3-alpine3.24 AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci && npm cache clean --force
+RUN npm ci --ignore-scripts && npm cache clean --force
 COPY . .
 RUN npm run build
 

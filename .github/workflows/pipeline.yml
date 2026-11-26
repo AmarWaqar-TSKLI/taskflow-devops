@@ -51,7 +51,7 @@ jobs:
       - name: ESLint (backend, frontend)
         run: |
           for svc in backend frontend; do
-            (cd "services/$svc" && npm ci --no-audit --no-fund && npm run lint)
+            (cd "services/$svc" && npm ci --ignore-scripts --no-audit --no-fund && npm run lint)
           done
       - name: ShellCheck (scripts/, infra/, monitoring/)
         run: shellcheck scripts/*.sh infra/*.sh monitoring/*.sh
@@ -69,7 +69,7 @@ jobs:
       - name: Prettier --check (backend, frontend)
         run: |
           for svc in backend frontend; do
-            (cd "services/$svc" && npm ci --no-audit --no-fund && npm run format:check)
+            (cd "services/$svc" && npm ci --ignore-scripts --no-audit --no-fund && npm run format:check)
           done
 
   dockerfile-lint:
@@ -99,7 +99,7 @@ jobs:
       - name: Jest + coverage (fails under 80%)
         run: |
           for svc in backend frontend; do
-            (cd "services/$svc" && npm ci --no-audit --no-fund && npm test)
+            (cd "services/$svc" && npm ci --ignore-scripts --no-audit --no-fund && npm test)
           done
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:

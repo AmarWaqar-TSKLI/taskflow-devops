@@ -43,8 +43,8 @@ if [[ ! -x "$plugin_dir/docker-compose" ]]; then
   log "installing docker compose $COMPOSE_VERSION ($arch)"
   base="https://github.com/docker/compose/releases/download/$COMPOSE_VERSION"
   mkdir -p "$plugin_dir"
-  curl -fsSL --retry 3 -o "$plugin_dir/docker-compose" "$base/docker-compose-linux-$arch"
-  expected="$(curl -fsSL --retry 3 "$base/docker-compose-linux-$arch.sha256" | awk '{print $1}')"
+  curl --proto '=https' --tlsv1.2 -fsSL --retry 3 -o "$plugin_dir/docker-compose" "$base/docker-compose-linux-$arch"
+  expected="$(curl --proto '=https' --tlsv1.2 -fsSL --retry 3 "$base/docker-compose-linux-$arch.sha256" | awk '{print $1}')"
   echo "$expected  $plugin_dir/docker-compose" | sha256sum -c -
   chmod 0755 "$plugin_dir/docker-compose"
 fi
