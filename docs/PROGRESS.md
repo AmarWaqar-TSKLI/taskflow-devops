@@ -12,7 +12,7 @@
 | Area | Owner | Done / total |
 |------|-------|--------------|
 | Member setup | Each member | 0 / 3 |
-| App, tests & monitoring | M1 | 5 / 14 |
+| App, tests & monitoring | M1 | 8 / 14 |
 | Containers, scripts, CD & PDF | M2 | 0 / 15 |
 | CI, DevSecOps, diagram & report | M3 | 0 / 16 |
 | AWS infra & incident note | M4 | 8 / 16 |
@@ -40,9 +40,9 @@ Tick your own initials when done.
 | M1-03 | Tasks API CRUD (tests first, 400/404 covered) | 20 Nov | ✅ | ✅ | `npm test` (12/12 backend tests incl. 400/404, mocked repo), `npm run lint`, `npm run format:check` |
 | M1-04 | Postgres repository + env config + auto-create table | 20 Nov | ✅ | ✅ | Unit tests (`pg.Pool` mocked) + live `postgres:17.12-alpine3.24` container CRUD & schema init |
 | M1-05 | Frontend task UI + tests | 21 Nov | ✅ | ✅ | `npm run build` (`dist/`), `npm test` (12/12 tests, 100% cov), `npm run lint`, `npm run format:check`, live container stack on `:8080` |
-| M1-06 | Coverage ≥ 80% enforced, lcov for Sonar | 21 Nov | ⬜ | ⬜ | |
-| M1-07 | JSON request logging | 22 Nov | ⬜ | ⬜ | |
-| M1-08 | `APP_VERSION` in health response | 22 Nov | ⬜ | ⬜ | |
+| M1-06 | Coverage ≥ 80% enforced, lcov for Sonar | 21 Nov | ✅ | ✅ | `coverageThreshold: 80` + `coverage/lcov.info` in both `jest.config.js` (96%+ backend, 91%+ frontend) |
+| M1-07 | JSON request logging | 22 Nov | ✅ | ✅ | `src/logger.js` emits `{"level","msg","method","path","status","duration_ms"}` JSON lines; unit + container log verified |
+| M1-08 | `APP_VERSION` in health response | 22 Nov | ✅ | ✅ | `GET /api/health` returns `APP_VERSION` (unit tested + container tested with `v1.0.99`) |
 | M1-09 | k6 load test script + README | 25 Nov | ⬜ | ⬜ | |
 | M1-10 | CloudWatch agent config (memory) | 23 Nov | ⬜ | ⬜ | |
 | M1-11 | SNS topic + all members subscribed | 23 Nov | ⬜ | ⬜ | |

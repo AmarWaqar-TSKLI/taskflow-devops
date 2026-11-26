@@ -1,6 +1,7 @@
 const express = require("express");
 const { loadConfig } = require("./config");
 const { AppError } = require("./errors");
+const { createRequestLogger } = require("./logger");
 const { createTaskService } = require("./services/tasks");
 const { createTasksRouter } = require("./routes/tasks");
 
@@ -13,6 +14,7 @@ function createApp(options = {}) {
 
   const app = express();
   app.disable("x-powered-by");
+  app.use(createRequestLogger(options.logger));
   app.use(express.json({ limit: "16kb" }));
 
   // Liveness probe only: must never query Postgres (ARCHITECTURE §3.2).
