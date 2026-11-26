@@ -1,0 +1,217 @@
+# TaskFlow CI/CD pipeline (ARCHITECTURE §5). Jobs run in order; a failure stops everything after it.
+# Job names are fixed: they are the status checks.
+#   2-10  every push and pull request
+#   11-12 push to main only. 12-deploy also needs repo variable DEPLOY_ENABLED=true (paid AWS layer up).
+name: pipeline
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pipeline-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  NODE_VERSION: "24"
+  GITLEAKS_IMAGE: zricethezav/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+  HADOLINT_IMAGE: hadolint/hadolint:v2.14.0@sha256:27086352fd5e1907ea2b934eb1023f217c5ae087992eb59fde121dce9c9ff21e
+  TRIVY_IMAGE: aquasec/trivy:0.76.2@sha256:8f6bb947dbc528902e11f2f5be52f7b519f6a39d5d148f41166f2040499768fb
+  SNYK_VERSION: 1.1308.4
+
+jobs:
+  secret-scan:
+    name: 2-secret-scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0 # full history
+      - name: Gitleaks (full history)
+        run: |
+          docker run --rm --user "$(id -u):$(id -g)" -v "$PWD:/repo" "$GITLEAKS_IMAGE" \
+            git /repo --redact --verbose --exit-code 1
+
+  lint:
+    name: 3-lint
+    needs: secret-scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: ESLint (backend, frontend)
+        run: |
+          for svc in backend frontend; do
+            (cd "services/$svc" && npm ci --no-audit --no-fund && npm run lint)
+          done
+      - name: ShellCheck (scripts/, infra/, monitoring/)
+        run: shellcheck scripts/*.sh infra/*.sh monitoring/*.sh
+
+  format:
+    name: 4-format
+    needs: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Prettier --check (backend, frontend)
+        run: |
+          for svc in backend frontend; do
+            (cd "services/$svc" && npm ci --no-audit --no-fund && npm run format:check)
+          done
+
+  dockerfile-lint:
+    name: 5-dockerfile-lint
+    needs: format
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Hadolint (fails on warning or worse)
+        run: |
+          for svc in backend frontend; do
+            echo "== services/$svc/Dockerfile"
+            docker run --rm -i "$HADOLINT_IMAGE" hadolint --failure-threshold warning - < "services/$svc/Dockerfile"
+          done
+
+  unit-tests:
+    name: 6-unit-tests
+    needs: dockerfile-lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Jest + coverage (fails under 80%)
+        run: |
+          for svc in backend frontend; do
+            (cd "services/$svc" && npm ci --no-audit --no-fund && npm test)
+          done
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage
+          path: services/*/coverage/lcov.info
+          retention-days: 7
+
+  static-analysis:
+    name: 7-static-analysis
+    needs: unit-tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0 # Sonar needs history for new-code detection
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: coverage
+          path: services
+      - name: Make lcov paths repo-relative
+        run: |
+          for svc in backend frontend; do
+            sed -i "s#^SF:src/#SF:services/$svc/src/#" "services/$svc/coverage/lcov.info"
+          done
+      - name: SonarCloud scan + wait for quality gate
+        uses: SonarSource/sonarqube-scan-action@e805d875275f728fac1885b413934be6d7c63f65 # v8.4.1
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          args: >
+            -Dsonar.qualitygate.wait=true
+            -Dsonar.qualitygate.timeout=300
+
+  dependency-scan:
+    name: 8-dependency-scan
+    needs: static-analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Snyk (fails on high/critical)
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: |
+          for svc in backend frontend; do
+            echo "== $svc"
+            npx --yes "snyk@$SNYK_VERSION" test --file="services/$svc/package-lock.json" \
+              --package-manager=npm --severity-threshold=high
+          done
+
+  build-image:
+    name: 9-build-image
+    needs: dependency-scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: docker build + save
+        run: |
+          mkdir -p images
+          for svc in backend frontend; do
+            docker build -t "taskflow-$svc:ci" "services/$svc"
+            docker save -o "images/$svc.tar" "taskflow-$svc:ci"
+          done
+          ls -lh images
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: images
+          path: images/*.tar
+          retention-days: 3
+
+  image-scan:
+    name: 10-image-scan
+    needs: build-image
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: images
+          path: images
+      - name: Trivy (fails on HIGH/CRITICAL)
+        run: |
+          touch .trivyignore
+          for svc in backend frontend; do
+            echo "== taskflow-$svc"
+            docker run --rm -v "$PWD:/work" -w /work -v trivy-cache:/root/.cache "$TRIVY_IMAGE" \
+              image --input "images/$svc.tar" --severity HIGH,CRITICAL --ignore-unfixed \
+              --ignorefile .trivyignore --exit-code 1 --no-progress
+          done
+
+  push-image:
+    name: 11-push-image
+    needs: image-scan
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/push-image.yml
+
+  deploy:
+    name: 12-deploy
+    needs: push-image
+    if: vars.DEPLOY_ENABLED == 'true'
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/deploy.yml
+    with:
+      image-tag: ${{ needs.push-image.outputs.image-tag }}
