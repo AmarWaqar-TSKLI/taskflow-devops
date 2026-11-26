@@ -13,7 +13,7 @@
 |------|-------|--------------|
 | Member setup | Each member | 0 / 3 |
 | App, tests & monitoring | M1 | 8 / 14 |
-| Containers, scripts, CD & PDF | M2 | 0 / 15 |
+| Containers, scripts, CD & PDF | M2 | 3 / 15 |
 | CI, DevSecOps, diagram & report | M3 | 0 / 16 |
 | AWS infra & incident note | M4 | 8 / 16 |
 | Demos | Whole team | 0 / 7 |
@@ -27,7 +27,7 @@ Tick your own initials when done.
 
 | ID | Task | M1 | M2 | M3 | M4 |
 |----|------|----|----|----|----|
-| T-01 | Your row in the Team table filled | ✅ | ⬜ | ⬜ | ⬜ |
+| T-01 | Your row in the Team table filled | ✅ | ✅ | ⬜ | ⬜ |
 | T-02 | Tools installed | ✅ | ⬜ | ⬜ | ⬜ |
 | T-03 | Docs read | ✅ | ⬜ | ⬜ | ⬜ |
 
@@ -54,9 +54,9 @@ Tick your own initials when done.
 
 | ID | Task | Due | Built | Tested | Proof |
 |----|------|-----|-------|--------|-------|
-| M2-01 | Backend Dockerfile + .dockerignore | 18 Nov | ⬜ | ⬜ | |
-| M2-02 | Frontend Dockerfile + nginx.conf + .dockerignore | 18 Nov | ⬜ | ⬜ | |
-| M2-03 | `docker-compose.yml` + `.env.example` + "Run locally" README | 19 Nov | ⬜ | ⬜ | |
+| M2-01 | Backend Dockerfile + .dockerignore | 18 Nov | ✅ | ✅ | PR #6: Hadolint clean · `id` = uid 1000 (node) · Trivy HIGH/CRITICAL 0 · healthy in Compose (hello-world app until M1-01 lands) |
+| M2-02 | Frontend Dockerfile + nginx.conf + .dockerignore | 18 Nov | ✅ | ✅ | PR #6: Hadolint clean · `id` = uid 101 (nginx) · `/health` 200 · `/api/` proxied · Trivy HIGH/CRITICAL 0 (hello-world app) |
+| M2-03 | `docker-compose.yml` + `.env.example` + "Run locally" README | 19 Nov | ✅ | ⬜ | PR #6: `docker compose up --build` → 3 healthy, CRUD via :8080 (hello-world app); 🚧 re-test from a fresh clone once M1's app is on main |
 | M2-04 | `scripts/build-and-test.sh` | 20 Nov | ⬜ | ⬜ | |
 | M2-05 | `scripts/healthcheck.sh` | 20 Nov | ⬜ | ⬜ | |
 | M2-06 | `scripts/smoke-test.sh` | 21 Nov | ⬜ | ⬜ | |
