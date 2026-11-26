@@ -12,10 +12,10 @@
 | Area | Owner | Done / total |
 |------|-------|--------------|
 | Member setup | Each member | 0 / 3 |
-| App, tests & monitoring | M1 | 0 / 14 |
+| App, tests & monitoring | M1 | 8 / 14 |
 | Containers, scripts, CD & PDF | M2 | 3 / 15 |
 | CI, DevSecOps, diagram & report | M3 | 0 / 16 |
-| AWS infra & incident note | M4 | 0 / 16 |
+| AWS infra & incident note | M4 | 8 / 16 |
 | Demos | Whole team | 0 / 7 |
 | Submission | Whole team | 0 / 12 |
 
@@ -27,28 +27,28 @@ Tick your own initials when done.
 
 | ID | Task | M1 | M2 | M3 | M4 |
 |----|------|----|----|----|----|
-| T-01 | Your row in the Team table filled | ⬜ | ✅ | ⬜ | ⬜ |
-| T-02 | Tools installed | ⬜ | ⬜ | ⬜ | ⬜ |
-| T-03 | Docs read | ⬜ | ⬜ | ⬜ | ⬜ |
+| T-01 | Your row in the Team table filled | ✅ | ✅ | ⬜ | ⬜ |
+| T-02 | Tools installed | ✅ | ⬜ | ⬜ | ⬜ |
+| T-03 | Docs read | ✅ | ⬜ | ⬜ | ⬜ |
 
 ## Member 1 — Application, tests, load test & monitoring
 
 | ID | Task | Due | Built | Tested | Proof |
 |----|------|-----|-------|--------|-------|
-| M1-01 | Backend skeleton + `/api/health` + Jest/ESLint/Prettier | 17 Nov | ⬜ | ⬜ | |
-| M1-02 | Frontend skeleton + esbuild + Jest/ESLint/Prettier | 18 Nov | ⬜ | ⬜ | |
-| M1-03 | Tasks API CRUD (tests first, 400/404 covered) | 20 Nov | ⬜ | ⬜ | |
-| M1-04 | Postgres repository + env config + auto-create table | 20 Nov | ⬜ | ⬜ | |
-| M1-05 | Frontend task UI + tests | 21 Nov | ⬜ | ⬜ | |
-| M1-06 | Coverage ≥ 80% enforced, lcov for Sonar | 21 Nov | ⬜ | ⬜ | |
-| M1-07 | JSON request logging | 22 Nov | ⬜ | ⬜ | |
-| M1-08 | `APP_VERSION` in health response | 22 Nov | ⬜ | ⬜ | |
-| M1-09 | k6 load test script + README | 25 Nov | ⬜ | ⬜ | |
-| M1-10 | CloudWatch agent config (memory) | 23 Nov | ⬜ | ⬜ | |
-| M1-11 | SNS topic + all members subscribed | 23 Nov | ⬜ | ⬜ | |
-| M1-12 | Dashboard + `monitoring/dashboard.json` | 24 Nov | ⬜ | ⬜ | |
-| M1-13 | ≥ 2 alarms, each tested | 24 Nov | ⬜ | ⬜ | |
-| M1-14 | App README section + lessons for report | 29 Nov | ⬜ | ⬜ | |
+| M1-01 | Backend skeleton + `/api/health` + Jest/ESLint/Prettier | 17 Nov | ✅ | ✅ | `npm test` (2/2 health tests, 100% cov), `npm run lint`, `npm run format:check` |
+| M1-02 | Frontend skeleton + esbuild + Jest/ESLint/Prettier | 18 Nov | ✅ | ✅ | `npm run build` (`dist/`), `npm test` (jsdom), `npm run lint`, `npm run format:check` |
+| M1-03 | Tasks API CRUD (tests first, 400/404 covered) | 20 Nov | ✅ | ✅ | `npm test` (12/12 backend tests incl. 400/404, mocked repo), `npm run lint`, `npm run format:check` |
+| M1-04 | Postgres repository + env config + auto-create table | 20 Nov | ✅ | ✅ | Unit tests (`pg.Pool` mocked) + live `postgres:17.12-alpine3.24` container CRUD & schema init |
+| M1-05 | Frontend task UI + tests | 21 Nov | ✅ | ✅ | `npm run build` (`dist/`), `npm test` (12/12 tests, 100% cov), `npm run lint`, `npm run format:check`, live container stack on `:8080` |
+| M1-06 | Coverage ≥ 80% enforced, lcov for Sonar | 21 Nov | ✅ | ✅ | `coverageThreshold: 80` + `coverage/lcov.info` in both `jest.config.js` (96%+ backend, 91%+ frontend) |
+| M1-07 | JSON request logging | 22 Nov | ✅ | ✅ | `src/logger.js` emits `{"level","msg","method","path","status","duration_ms"}` JSON lines; unit + container log verified |
+| M1-08 | `APP_VERSION` in health response | 22 Nov | ✅ | ✅ | `GET /api/health` returns `APP_VERSION` (unit tested + container tested with `v1.0.99`) |
+| M1-09 | k6 load test script + README | 25 Nov | ✅ | ⬜ | `loadtest/load.js` + `loadtest/README.md`; local `grafana/k6` smoke run passed (0% failed); 🚧 live ALB scale-out run in D-04 |
+| M1-10 | CloudWatch agent config (memory) | 23 Nov | ✅ | ⬜ | `monitoring/cloudwatch-agent.json` uploaded to SSM `/taskflow/prod/cloudwatch-agent` (v1, `627551519533`); 🚧 verify `mem_used_percent` on EC2 boot |
+| M1-11 | SNS topic + all members subscribed | 23 Nov | ✅ | ⬜ | `taskflow-alerts` created in `627551519533` + all 4 `@lhr.nu.edu.pk` emails subscribed; 🚧 members confirm email + test publish |
+| M1-12 | Dashboard + `monitoring/dashboard.json` | 24 Nov | ✅ | ⬜ | `taskflow-dashboard` created in CloudWatch (`ASG` + `CWAgent` live); 🚧 re-run `setup-monitoring.sh up` after `infra/up.sh` to attach ALB widgets + screenshot |
+| M1-13 | ≥ 2 alarms, each tested | 24 Nov | ✅ | ⬜ | `taskflow-high-cpu` live + `monitoring/alarms.md` + 3 ALB/TG alarms in `setup-monitoring.sh`; 🚧 run after `infra/up.sh` & trigger each (`D-07`) |
+| M1-14 | App README section + lessons for report | 29 Nov | ✅ | ⬜ | Added `Application, Testing & Monitoring` to root `README.md`; 🚧 add final lessons learned to `report.md` after demos |
 
 ## Member 2 — Containers, shell scripts, CD, README & PDF
 
@@ -95,19 +95,19 @@ Tick your own initials when done.
 
 | ID | Task | Due | Built | Tested | Proof |
 |----|------|-----|-------|--------|-------|
-| M4-00 | AWS budget alert, IAM users + MFA, region us-east-1 | 17 Nov | ⬜ | ⬜ | |
-| M4-01 | VPC, 4 subnets, IGW, NAT, route tables | 19 Nov | ⬜ | ⬜ | |
-| M4-02 | Security groups (no SSH) | 19 Nov | ⬜ | ⬜ | |
-| M4-03 | GitHub OIDC provider + CI role + deploy role | 20 Nov | ⬜ | ⬜ | |
-| M4-04 | EC2 role + instance profile | 20 Nov | ⬜ | ⬜ | |
-| M4-05 | RDS Postgres + Secrets Manager password | 21 Nov | ⬜ | ⬜ | |
-| M4-06 | SSM parameters for image tags | 21 Nov | ⬜ | ⬜ | |
-| M4-07 | `infra/user-data.sh` (with M2) | 22 Nov | ⬜ | ⬜ | |
-| M4-08 | Launch template (IMDSv2, no key pair) | 22 Nov | ⬜ | ⬜ | |
-| M4-09 | ALB + 2 target groups + path routing | 23 Nov | ⬜ | ⬜ | |
-| M4-10 | ASG (min 2, 2 AZs, target tracking) | 23 Nov | ⬜ | ⬜ | |
-| M4-11 | SSM Session Manager works, SSH impossible | 23 Nov | ⬜ | ⬜ | |
-| M4-12 | Live link in README + `ALB_URL` variable | 23 Nov | ⬜ | ⬜ | |
+| M4-00 | AWS budget alert, IAM users + MFA, region us-east-1 | 17 Nov | ✅ | ⬜ | PR #1 (`00-budget.sh`, `00-team-users.sh`); 🚧 members confirm login + MFA |
+| M4-01 | VPC, 4 subnets, IGW, NAT, route tables | 19 Nov | ✅ | ✅ | PR #1 (`01-network.sh`, `nat.sh`); re-run creates nothing; IDs in infra/README §1–2 |
+| M4-02 | Security groups (no SSH) | 19 Nov | ✅ | ✅ | PR #1 (`02-security-groups.sh`); rules in infra/README §3 |
+| M4-03 | GitHub OIDC provider + CI role + deploy role | 20 Nov | ✅ | ⬜ | PR #1 (`03-iam.sh`); 🚧 needs a workflow on main to assume the role |
+| M4-04 | EC2 role + instance profile | 20 Nov | ✅ | ✅ | PR #1 (`iam/ec2-*.json`); instance profile exists with the role |
+| M4-05 | RDS Postgres + Secrets Manager password | 21 Nov | ✅ | ✅ | `rds.sh`; not public, encrypted, db-sg only; reachable on 5432 from an app-sg instance (infra/README §7) |
+| M4-06 | SSM parameters for image tags | 21 Nov | ✅ | ✅ | `04-ssm-params.sh`; both params exist (`none`) |
+| M4-07 | `infra/user-data.sh` (with M2) | 22 Nov | ✅ | ⬜ | Host setup, secret, RDS reachability tested on a test instance (infra/README §7); 🚧 full `compose up` once M2 images + compose.prod exist |
+| M4-08 | Launch template (IMDSv2, no key pair) | 22 Nov | ✅ | ✅ | `05-launch-template.sh`; test instance: no key, no public IP, IMDSv2 required |
+| M4-09 | ALB + 2 target groups + path routing | 23 Nov | ✅ | ✅ | `06-target-groups.sh`, `alb.sh`; `/`→frontend, `/api/*`→backend, both TGs healthy (infra/README §8–9) |
+| M4-10 | ASG (min 2, 2 AZs, target tracking) | 23 Nov | ✅ | ✅ | `asg.sh`; 2 InService in 1a + 1b; instance-kill recovery ~1m50s (infra/README §9) |
+| M4-11 | SSM Session Manager works, SSH impossible | 23 Nov | ✅ | ⬜ | SSM Online, no key/no :22; 🚧 console screenshot of a session |
+| M4-12 | Live link in README + `ALB_URL` variable | 23 Nov | ⬜ | ⬜ | `alb.sh up` sets `ALB_URL` automatically; 🚧 final link once the real app is deployed |
 | M4-13 | `infra/README.md` complete (rebuild + teardown) | 28 Nov | ⬜ | ⬜ | |
 | M4-14 | Cost control, everything up until grading | ongoing | ⬜ | ⬜ | |
 | M4-15 | Post-incident note (after D-07) | 28 Nov | ⬜ | ⬜ | |

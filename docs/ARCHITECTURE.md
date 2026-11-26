@@ -122,6 +122,8 @@ The backend creates its table on startup (`CREATE TABLE IF NOT EXISTS tasks ...`
 | Secret (Secrets Manager) | `taskflow/prod/db` |
 | SSM parameter — current tag | `/taskflow/prod/image_tag` |
 | SSM parameter — previous tag | `/taskflow/prod/previous_image_tag` |
+| SSM parameter — compose file | `/taskflow/prod/compose_file` (content of `docker-compose.prod.yml`, written by `12-deploy` before each instance refresh) |
+| SSM parameter — CloudWatch agent config | `/taskflow/prod/cloudwatch-agent` (content of `monitoring/cloudwatch-agent.json`, M1) |
 | IAM role — CI (stage 11) | `taskflow-github-ci-role` |
 | IAM role — deploy (stage 12 + rollback) | `taskflow-github-deploy-role` |
 | IAM role — EC2 | `taskflow-ec2-role` (+ instance profile of same name) |
@@ -225,6 +227,17 @@ sequenceDiagram
 - **What runs on an instance:** the launch template's user-data (`infra/user-data.sh`) installs Docker,
   logs in to ECR, reads the tag from SSM, reads the DB secret into a root-only env file, and runs
   `docker compose -f docker-compose.prod.yml up -d`.
+- **Instance layout (contract between `infra/user-data.sh` and `docker-compose.prod.yml`):**
+
+  | File on the instance | Comes from | Contents |
+  |----------------------|-----------|----------|
+  | `/opt/taskflow/docker-compose.prod.yml` | SSM `/taskflow/prod/compose_file` | the repo's `docker-compose.prod.yml` at the deployed commit |
+  | `/opt/taskflow/.env` | user-data | `IMAGE_TAG`, `ECR_REGISTRY` (`<acct>.dkr.ecr.us-east-1.amazonaws.com`), `AWS_REGION`. Compose reads it for `${...}` interpolation, so use `image: ${ECR_REGISTRY}/taskflow-backend:${IMAGE_TAG}` |
+  | `/opt/taskflow/backend.env` (mode 0600, root) | Secrets Manager `taskflow/prod/db` + tag | `PORT`, `APP_VERSION`, `LOG_LEVEL`, `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER`, `DB_PASSWORD`. Use `env_file: backend.env` on the backend service |
+
+  The deploy job therefore does: put `docker-compose.prod.yml` into `/taskflow/prod/compose_file` →
+  set `image_tag` → instance refresh. Both are already allowed by `taskflow-github-deploy-role`
+  (`ssm:PutParameter` on `/taskflow/prod/*`). If `image_tag` is `none`, user-data prepares the host and starts nothing.
 - **Manual rollback:** run the *Rollback* workflow with an existing tag (e.g. `v1.0.40`). It checks the tag
   exists in ECR, then runs the same `deploy.sh` + `smoke-test.sh`.
 
