@@ -43,8 +43,8 @@ Tick your own initials when done.
 | M1-06 | Coverage ≥ 80% enforced, lcov for Sonar | 21 Nov | ✅ | ✅ | `coverageThreshold: 80` + `coverage/lcov.info` in both `jest.config.js` (96%+ backend, 91%+ frontend) |
 | M1-07 | JSON request logging | 22 Nov | ✅ | ✅ | `src/logger.js` emits `{"level","msg","method","path","status","duration_ms"}` JSON lines; unit + container log verified |
 | M1-08 | `APP_VERSION` in health response | 22 Nov | ✅ | ✅ | `GET /api/health` returns `APP_VERSION` (unit tested + container tested with `v1.0.99`) |
-| M1-09 | k6 load test script + README | 25 Nov | ⬜ | ⬜ | |
-| M1-10 | CloudWatch agent config (memory) | 23 Nov | ⬜ | ⬜ | |
+| M1-09 | k6 load test script + README | 25 Nov | ✅ | ⬜ | `loadtest/load.js` + `loadtest/README.md`; local `grafana/k6` smoke run passed (0% failed); 🚧 live ALB scale-out run in D-04 |
+| M1-10 | CloudWatch agent config (memory) | 23 Nov | ✅ | ⬜ | `monitoring/cloudwatch-agent.json` valid JSON; 🚧 upload to SSM `/taskflow/prod/cloudwatch-agent` in `627551519533` + verify `mem_used_percent` on EC2 |
 | M1-11 | SNS topic + all members subscribed | 23 Nov | ⬜ | ⬜ | |
 | M1-12 | Dashboard + `monitoring/dashboard.json` | 24 Nov | ⬜ | ⬜ | |
 | M1-13 | ≥ 2 alarms, each tested | 24 Nov | ⬜ | ⬜ | |
