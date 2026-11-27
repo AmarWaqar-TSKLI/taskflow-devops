@@ -269,14 +269,34 @@ console.log(gaps.length ? `Still missing (${gaps.length}):\n  - ${gaps.join("\n 
 if (process.argv.includes("--check-links")) {
   const urls = [...new Set([...html.matchAll(/href="(https?:[^"]+)"/g)].map((m) => m[1].replace(/&amp;/g, "&")))];
   let bad = 0;
+  const ownFile = new RegExp(`^${repoUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}/(?:blob|tree)/main/(.+)$`);
   for (const u of urls) {
-    let code = "ERR";
-    try {
-      const res = await fetch(u, { method: "GET", redirect: "follow", signal: AbortSignal.timeout(10000) });
-      code = res.status;
-    } catch (e) {
-      code = e.name;
+    // GitHub refuses anonymous automated requests for file pages (503 even for public repos), so a
+    // link to a file in this repo is checked against the checkout instead: same path, same branch.
+    const own = u.match(ownFile);
+    if (own) {
+      const ok = existsSync(join(root, decodeURIComponent(own[1])));
+      if (!ok) bad++;
+      console.log(`${ok ? "OK  " : "FAIL"} ${ok ? "in repo" : "missing in repo"} ${u}`);
+      continue;
     }
+    let code = "ERR";
+    // GitHub answers 429/503 to fast, bare requests: browser-like UA, a pause, and one retry.
+    for (let attempt = 0; attempt < 2; attempt++) {
+      if (attempt) await new Promise((r) => setTimeout(r, 3000));
+      try {
+        const res = await fetch(u, {
+          redirect: "follow",
+          headers: { "User-Agent": "Mozilla/5.0 (submission link check)" },
+          signal: AbortSignal.timeout(10000),
+        });
+        code = res.status;
+      } catch (e) {
+        code = e.name;
+      }
+      if (typeof code === "number" && code < 400) break;
+    }
+    await new Promise((r) => setTimeout(r, 400));
     const ok = typeof code === "number" && code < 400;
     if (!ok) bad++;
     console.log(`${ok ? "OK  " : "FAIL"} ${code} ${u}`);
