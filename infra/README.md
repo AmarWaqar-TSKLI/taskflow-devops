@@ -187,9 +187,25 @@ Instances have no key pair, no public IP, and no security group allows port 22. 
 registered with SSM (`aws ssm describe-instance-information` → Online). Shell:
 `aws ssm start-session --target <instance-id>` or EC2 console → Connect → Session Manager.
 
-## 10. ECR (M2-07)
+## 10. ECR (M2-07): `scripts/aws-ecr-logs.sh up|status`
+| Setting | Value | Why |
+|---------|-------|-----|
+| Repositories | `taskflow-backend`, `taskflow-frontend` | One per service, names from ARCHITECTURE §3.5 |
+| Tag mutability | **IMMUTABLE** | A tag (`v1.0.N`, git SHA) always means the same image, so rollback to a tag is exact |
+| Scan on push | on | Second scan by AWS on top of Trivy in stage 10 |
+| Encryption | AES256 | Default at-rest encryption, no KMS cost |
+| Lifecycle | keep the newest 20 images | Bounded storage cost, still ~20 versions to roll back to |
+| Tags | `Project=taskflow`, `Owner=M2` | Cost tracking, teardown by tag |
+
+Created 25 Nov 2026 (proof: `docs/evidence/M2-07-*.jpg`). Pushed to only by `taskflow-github-ci-role`
+(stage 11); EC2 pulls with `AmazonEC2ContainerRegistryReadOnly`.
 
 ## 11. CloudWatch, SNS (M1 dashboard/alarms/SNS, M2 log groups)
+- **Log groups (M2-13):** `/taskflow/backend`, `/taskflow/frontend`, **7-day retention**, created by
+  `scripts/aws-ecr-logs.sh up` (proof: `docs/evidence/M2-13-01-log-groups-console.jpg`). Containers write to
+  them through the `awslogs` driver in `docker-compose.prod.yml` (non-blocking mode, so a CloudWatch delay
+  never stalls the app). Groups must exist first: the driver does not create them.
+- Dashboard, alarms, SNS: see [monitoring/](../monitoring/README.md) (M1).
 
 ## Deploy from scratch: order
 ```bash
@@ -202,7 +218,7 @@ infra/03-iam.sh                 # then set GitHub variables AWS_ACCOUNT_ID, AWS_
 infra/04-ssm-params.sh
 infra/05-launch-template.sh
 infra/06-target-groups.sh
-# M2: ECR repos + log groups; first merge to main pushes images (stage 11)
+scripts/aws-ecr-logs.sh up      # M2: ECR repos + log groups; first merge to main pushes images (stage 11)
 infra/up.sh                     # RDS -> NAT -> ALB (sets ALB_URL) -> ASG
 # M1: SNS topic, alarms, dashboard, CloudWatch agent config in SSM
 ```

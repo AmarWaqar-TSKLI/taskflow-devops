@@ -13,7 +13,7 @@
 |------|-------|--------------|
 | Member setup | Each member | 0 / 3 |
 | App, tests & monitoring | M1 | 11 / 14 |
-| Containers, scripts, CD & PDF | M2 | 12 / 15 |
+| Containers, scripts, CD & PDF | M2 | 14 / 15 |
 | CI, DevSecOps, diagram & report | M3 | 10 / 16 |
 | AWS infra & incident note | M4 | 13 / 16 |
 | Demos | Whole team | 6 / 7 |
@@ -68,7 +68,7 @@ Tick your own initials when done.
 |----|------|-----|-------|--------|-------|
 | M2-01 | Backend Dockerfile + .dockerignore | 18 Nov | ✅ | ✅ | PR #6: Hadolint clean · `id` = uid 1000 (node) · Trivy HIGH/CRITICAL 0 · healthy in Compose (hello-world app until M1-01 lands) |
 | M2-02 | Frontend Dockerfile + nginx.conf + .dockerignore | 18 Nov | ✅ | ✅ | PR #6: Hadolint clean · `id` = uid 101 (nginx) · `/health` 200 · `/api/` proxied · Trivy HIGH/CRITICAL 0 (hello-world app) |
-| M2-03 | `docker-compose.yml` + `.env.example` + "Run locally" README | 19 Nov | ✅ | ⬜ | PR #6: `docker compose up --build` → 3 healthy, CRUD via :8080 (hello-world app); 🚧 re-test from a fresh clone once M1's app is on main |
+| M2-03 | `docker-compose.yml` + `.env.example` + "Run locally" README | 19 Nov | ✅ | ✅ | PR #23: fresh clone of main (454b6e1) → `cp .env.example .env && docker compose up --build` → db, backend, frontend healthy (4 min, cold Docker) → `scripts/smoke-test.sh http://localhost:8080` passed on M1's real app (output in PR #23) |
 | M2-04 | `scripts/build-and-test.sh` | 20 Nov | ✅ | ✅ | PR #7: ShellCheck clean · passes on both services · exits 1 and names the step when a unit test fails (output in PR) |
 | M2-05 | `scripts/healthcheck.sh` | 20 Nov | ✅ | ✅ | PR #7: ShellCheck clean · exit 0 vs local Compose · exit 1 for a dead URL · exit 2 on bad args (output in PR) |
 | M2-06 | `scripts/smoke-test.sh` | 21 Nov | ✅ | ✅ | PR #7: ShellCheck clean · passes vs local Compose · fails when backend stopped or version mismatches (output in PR) |
@@ -79,8 +79,8 @@ Tick your own initials when done.
 | M2-11 | Job `12-deploy` + auto-rollback | 25 Nov | ✅ | ✅ | Push to main auto-deployed v1.0.17 and v1.0.18, smoke test passed · [run](https://github.com/hussainwaz/taskflow-devops/actions/runs/45879965344) |
 | M2-12 | `rollback.yml` manual workflow | 26 Nov | ✅ | ✅ | `rollback.yml` v1.0.17 → v1.0.15, smoke test passed · [run](https://github.com/hussainwaz/taskflow-devops/actions/runs/45881326487) |
 | M2-13 | Log groups + 7-day retention | 22 Nov | ✅ | ✅ | PR #8: `/taskflow/backend` + `/taskflow/frontend`, 7-day retention, created 25 Nov · `docs/evidence/M2-13-01-log-groups-console.jpg`, `M2-07-02-ecr-logs-cli-verify.jpg`; CloudWatch log lines from EC2 follow with the first deploy |
-| M2-14 | Root README final (run / deploy / teardown / links) | 29 Nov | ⬜ | ⬜ | |
-| M2-15 | `GroupX.pdf` assembled and submitted | 30 Nov | ⬜ | ⬜ | |
+| M2-14 | Root README final (run / deploy / teardown / links) | 29 Nov | ✅ | ✅ | PR #23: graders-facing README (links, team, architecture, run locally, 12-stage pipeline + CD + rollback, branching, network, security, deploy/teardown, scripts) · link check 27 Nov: every public link 200, every relative link exists |
+| M2-15 | `GroupX.pdf` assembled and submitted | 30 Nov | ⬜ | ⬜ | PR #24: `node docs/submission/build-pdf.mjs` builds the PDF from the repo; draft 27 Nov (9 pages); 🚧 D-01…D-07 screenshots, `architecture.png` (M3-14), group number in WORK.md |
 
 ## Member 3 — CI pipeline, DevSecOps, diagram & report
 

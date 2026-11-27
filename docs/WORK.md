@@ -10,7 +10,7 @@ Task IDs here match [PROGRESS.md](PROGRESS.md) and go in your branch names and c
 | Member | Name | Roll no. | GitHub | Area |
 |--------|------|----------|--------|------|
 | **M1** | Haseeb | 23L-3069 | @Haseebahmad22 | Application, tests, load test & monitoring |
-| **M2** | Hussain | 23L-3018 | @hussainwaz | Containers, shell scripts, CD, final README & PDF |
+| **M2** | Hussain Nawaz | 23L-3018 | @hussainwaz | Containers, shell scripts, CD, final README & PDF |
 | **M3** | Shuja | 23L-3024 | @slider79 | CI pipeline, DevSecOps, architecture diagram & report |
 | **M4** | Amar | 23L-3035 | @AmarWaqar-TSKLI | AWS infrastructure, IAM, networking & incident note |
 
