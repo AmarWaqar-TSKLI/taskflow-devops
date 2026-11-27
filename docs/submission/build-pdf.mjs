@@ -28,6 +28,10 @@ const esc = (s) =>
 const work = read("docs/WORK.md");
 const groupFromDoc = (work.match(/Group number[^*]*\*\*\s*([0-9A-Za-z]+)\s*\*\*/) || [])[1];
 const group = process.env.GROUP || (groupFromDoc && !/^_+$/.test(groupFromDoc) ? groupFromDoc : "X");
+if (!/^[0-9A-Za-z-]{1,20}$/.test(group)) {
+  console.error(`GROUP must be letters, digits or '-' (it becomes the file name), got '${group}'`);
+  process.exit(2);
+}
 
 const teamSection = work.slice(work.indexOf("## Team"), work.indexOf("Group number"));
 const members = teamSection
@@ -39,13 +43,15 @@ const members = teamSection
   });
 
 const readme = read("README.md");
+// Row found by a label pattern, so "| Live app |", "| **Live app** |" and "| Live app (ALB URL) |" all work.
 const link = (label) => {
-  const row = readme.split("\n").find((l) => l.startsWith(`| ${label} |`));
+  const re = new RegExp(`^\\|\\s*\\**${label}\\b`, "i");
+  const row = readme.split("\n").find((l) => re.test(l));
   const url = row && (row.match(/https?:\/\/[^\s|)]+/) || [])[0];
   return url || null;
 };
 const repoUrl = link("GitHub repo") || "https://github.com/hussainwaz/taskflow-devops";
-const liveUrl = link("Live app (ALB URL)");
+const liveUrl = link("Live app");
 const blob = (p) => `${repoUrl}/blob/main/${p}`;
 
 // ---------- tiny Markdown -> HTML (enough for report.md: headings, lists, tables, bold, code, links) ----------
@@ -53,7 +59,7 @@ function inline(s) {
   return esc(s)
     .replace(/`([^`]+)`/g, "<code>$1</code>")
     .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
-    .replace(/(^|[\s(])\*([^*\s][^*]*)\*/g, "$1<em>$2</em>")
+    .replace(/(^|[\s(])\*([^*\s][^*]*?)\*(?=[\s.,;:!?)]|$)/g, "$1<em>$2</em>")
     .replace(/\[([^\]]+)\]\((https?:[^)\s]+)\)/g, '<a href="$2">$1</a>')
     .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, '$1<a href="$2">$2</a>');
 }
