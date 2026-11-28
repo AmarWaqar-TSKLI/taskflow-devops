@@ -10,3 +10,15 @@
 /sonar-project.properties @slider79
 /infra/           @AmarWaqar-TSKLI
 /docs/incidents/  @AmarWaqar-TSKLI
+
+# More specific paths (the last matching line wins)
+/.github/workflows/push-image.yml @hussainwaz
+/.github/workflows/deploy.yml     @hussainwaz
+/.github/workflows/rollback.yml   @hussainwaz
+/.github/workflows/loadtest.yml   @Haseebahmad22
+/.github/workflows/aws-oidc-check.yml @AmarWaqar-TSKLI
+/docs/submission/                 @hussainwaz
+/docs/submission/architecture.*   @slider79
+/docs/submission/report.md        @slider79
+/docs/VIVA.md                     @slider79
+/.trivyignore                     @slider79
