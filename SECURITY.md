@@ -21,7 +21,7 @@ that fails a gate can reach ECR or production.
 | `10-image-scan` | Trivy 0.76.2 | any fixable **HIGH** or **CRITICAL** CVE in either image | `.trivyignore` (empty) |
 
 Dependabot (`.github/dependabot.yml`) opens weekly update PRs for npm (×2), Docker base images (×2) and
-GitHub Actions. Every third-party action and scanner image is pinned to a full commit SHA or image
+GitHub Actions. Dependabot security alerts are enabled too. The first alert, GHSA-g3hv-75wg-m249 (medium, `minimatch` < 11.0.1 pulled in by Jest as a dev dependency), was fixed with an npm `overrides` pin to `minimatch` ^11.0.9 in both services. Every third-party action and scanner image is pinned to a full commit SHA or image
 digest, so a moved tag cannot change what runs in CI.
 
 ## Secrets
