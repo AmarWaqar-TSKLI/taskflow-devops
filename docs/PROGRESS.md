@@ -94,7 +94,7 @@ Tick your own initials when done.
 | M3-10 | Branch protection with all required checks | 22 Nov | ✅ | ✅ | Ruleset `protection` on `main`: PR + 1 approval, checks 2–10 required, no force-push/deletion · `D06-01-branch-protection.png` |
 | M3-11 | `SECURITY.md` | 22 Nov | ✅ | ✅ | `SECURITY.md`: gates, secrets, hardening, branch protection, Dependabot decisions, 28 Nov scan results, accepted findings · linked from README (Pipeline + Security sections) · findings re-checked 28 Nov (Trivy incl. unfixed, npm audit, SonarCloud API, Dependabot alerts) |
 | M3-12 | PR template (+ CODEOWNERS) | 18 Nov | ✅ | ✅ | `.github/pull_request_template.md` filled in automatically on PRs #29, #30 · `.github/CODEOWNERS` now also names owners for M2's deploy/rollback workflows, the submission folder and M3's files |
-| M3-13 | `docs/VIVA.md` live-demo script, everyone rehearsed | 28 Nov | ✅ | ⬜ | `docs/VIVA.md`; 🚧 every member runs it once |
+| M3-13 | `docs/VIVA.md` live-demo script, everyone rehearsed | 28 Nov | ✅ | ⬜ | `docs/VIVA.md`: demo change now goes branch → PR → approval (direct push to protected `main` is rejected), stage-by-stage gate table, rehearsal log; 🚧 every member adds a row to the rehearsal log |
 | M3-14 | Architecture diagram (draft 20 Nov, final) | 28 Nov | ✅ | ✅ | `docs/submission/architecture.png` (source `architecture.dot`, `dot -Tpng`): 12 stages, OIDC roles, secrets, 2 AZs/4 subnets, request flow, monitoring |
 | M3-15 | Findings report + contribution table | 29 Nov | ✅ | ✅ | `docs/submission/report.md`: report + contribution table with all 4 names and roll numbers |
 
