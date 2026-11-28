@@ -13,21 +13,20 @@
 |------|-------|--------------|
 | Member setup | Each member | 3 / 3 |
 | App, tests & monitoring | M1 | 12 / 14 |
-| Containers, scripts, CD & PDF | M2 | 14 / 15 |
-| CI, DevSecOps, diagram & report | M3 | 12 / 16 |
+| Containers, scripts, CD & PDF | M2 | 15 / 15 |
+| CI, DevSecOps, diagram & report | M3 | 13 / 16 |
 | AWS infra & incident note | M4 | 15 / 16 |
-| Demos | Whole team | 6 / 7 |
-| Submission | Whole team | 8 / 12 |
+| Demos | Whole team | 7 / 7 |
+| Submission | Whole team | 10 / 12 |
 
 ---
 
-## Status 28 Nov — what's left
+## Status 28 Nov — ready to submit
 
-- **Live:** http://taskflow-alb-466982077.us-east-1.elb.amazonaws.com, auto-deployed on every push to main. Paid AWS layer stays **up until grading**.
-- **PDF:** `node docs/submission/build-pdf.mjs` → `docs/submission/23L-3035_23L-3018_23L-3069_23L-3024.pdf` (we have no group number). All links checked OK. **One gap:** `D06-01-branch-protection.png`.
-- **Branch protection (M3-10, D-06):** Hussain (repo admin) turns it on: Settings → Branches → rule for `main`, require PR + 1 approval, required checks `2-secret-scan` … `10-image-scan`. Amar takes the screenshot → `docs/evidence/D06-01-branch-protection.png`, plus PR #22 showing "merge blocked" → `D02-02-merge-blocked.png`. Then rebuild the PDF and submit it.
-- **SNS:** confirmation emails re-sent 28 Nov to Shuja (l233024) and Hussain (l233018): click "Confirm subscription".
-- Close PR #22 after the merge-blocked screenshot (never merge it).
+- **PDF:** `docs/submission/23L-3035_23L-3018_23L-3069_23L-3024.pdf` (rebuild: `node docs/submission/build-pdf.mjs`): nothing missing, all links OK.
+- **Live:** http://taskflow-alb-466982077.us-east-1.elb.amazonaws.com. Keep the AWS stack **up until grading** (F-12).
+- `main` is protected (ruleset): changes now go through a PR with 1 approval and checks 2–10.
+- SNS: Shuja + Hussain confirm the AWS subscription email (check Junk/Quarantine).
 
 ## Member setup — each member, by Tue 17 Nov
 
@@ -76,13 +75,13 @@ Tick your own initials when done.
 | M2-12 | `rollback.yml` manual workflow | 26 Nov | ✅ | ✅ | `rollback.yml` v1.0.17 → v1.0.15, smoke test passed · [run](https://github.com/hussainwaz/taskflow-devops/actions/runs/45881326487) |
 | M2-13 | Log groups + 7-day retention | 22 Nov | ✅ | ✅ | PR #8: `/taskflow/backend` + `/taskflow/frontend`, 7-day retention, created 25 Nov · `docs/evidence/M2-13-01-log-groups-console.jpg`, `M2-07-02-ecr-logs-cli-verify.jpg`; CloudWatch log lines from EC2 follow with the first deploy |
 | M2-14 | Root README final (run / deploy / teardown / links) | 29 Nov | ✅ | ✅ | PR #23: graders-facing README (links, team, architecture, run locally, 12-stage pipeline + CD + rollback, branching, network, security, deploy/teardown, scripts) · link check 27 Nov: every public link 200, every relative link exists |
-| M2-15 | `GroupX.pdf` assembled and submitted | 30 Nov | ✅ | ⬜ | `node docs/submission/build-pdf.mjs` → `23L-3035_23L-3018_23L-3069_23L-3024.pdf` (no group number, so named by roll numbers); all 18 links OK; 🚧 D06-01 branch-protection screenshot, then submit |
+| M2-15 | `GroupX.pdf` assembled and submitted | 30 Nov | ✅ | ✅ | `23L-3035_23L-3018_23L-3069_23L-3024.pdf` (17 pages, nothing missing, all 18 links OK, 28 Nov) |
 
 ## Member 3 — CI pipeline, DevSecOps, diagram & report
 
 | ID | Task | Due | Built | Tested | Proof |
 |----|------|-----|-------|--------|-------|
-| M3-00 | `main` protected + SonarCloud/Snyk tokens in GitHub Secrets | 17 Nov | ✅ | ✅ | `SONAR_TOKEN`, `SNYK_TOKEN` in repo secrets. Branch protection removed 26 Nov (team pushes to main), see M3-10 |
+| M3-00 | `main` protected + SonarCloud/Snyk tokens in GitHub Secrets | 17 Nov | ✅ | ✅ | `SONAR_TOKEN`, `SNYK_TOKEN` in repo secrets; `main` protected by ruleset (M3-10) |
 | M3-01 | `pipeline.yml` skeleton, jobs chained in order | 18 Nov | ✅ | ✅ | `pipeline.yml`: jobs 2→12 chained with `needs:` · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
 | M3-02 | `2-secret-scan` Gitleaks full history | 18 Nov | ✅ | ✅ | Gitleaks v8.30.1, `fetch-depth: 0` · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
 | M3-03 | `3-lint` (ESLint + ShellCheck), `4-format` (Prettier) | 19 Nov | ✅ | ✅ | ESLint ×2 + ShellCheck on scripts/, infra/, monitoring/ · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
@@ -92,7 +91,7 @@ Tick your own initials when done.
 | M3-07 | `8-dependency-scan` Snyk + `dependabot.yml` | 21 Nov | ✅ | ✅ | Snyk 1.1308.4 `--severity-threshold=high` ×2 + `.github/dependabot.yml` (npm ×2, docker ×2, actions) · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
 | M3-08 | `9-build-image` + image artifacts | 21 Nov | ✅ | ✅ | `docker save` → `images` artifact, pushed unchanged by job 11 · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
 | M3-09 | `10-image-scan` Trivy HIGH/CRITICAL | 21 Nov | ✅ | ✅ | Trivy 0.76.2 HIGH/CRITICAL, `--exit-code 1`, 0 findings · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
-| M3-10 | Branch protection with all required checks | 22 Nov | ⬜ | ⬜ | |
+| M3-10 | Branch protection with all required checks | 22 Nov | ✅ | ✅ | Ruleset `protection` on `main`: PR + 1 approval, checks 2–10 required, no force-push/deletion · `D06-01-branch-protection.png` |
 | M3-11 | `SECURITY.md` | 22 Nov | ✅ | ⬜ | `SECURITY.md`: gates, secrets, hardening, accepted findings |
 | M3-12 | PR template (+ CODEOWNERS) | 18 Nov | ✅ | ⬜ | `.github/pull_request_template.md` + `.github/CODEOWNERS` |
 | M3-13 | `docs/VIVA.md` live-demo script, everyone rehearsed | 28 Nov | ✅ | ⬜ | `docs/VIVA.md`; 🚧 every member runs it once |
@@ -128,11 +127,11 @@ No owners: the team runs these together and rotates who drives (details in [WORK
 | ID | Demo | Driven by | Done | Screenshots saved |
 |----|------|-----------|------|-------------------|
 | D-01 | CI run, jobs 2–10 separate | Amar (CLI) — pipeline run 45879965344 | ✅ | ✅ |
-| D-02 | Security stage blocks a PR | Amar (CLI) — PR #22, run 45895734843: `8-dependency-scan` (Snyk, lodash 4.17.20) failed, 9–12 skipped | ✅ | ✅ D02-01 (🚧 D02-02 merge-blocked needs branch protection) |
+| D-02 | Security stage blocks a PR | Amar (CLI) — PR #22, run 45895734843: `8-dependency-scan` (Snyk, lodash 4.17.20) failed, 9–12 skipped | ✅ | ✅ |
 | D-03 | Instance terminated → stays up → recovers | Amar (CLI) — instance kill 26 Nov 19:13 UTC | ✅ | ✅ |
 | D-04 | Load test → scale-out → scale-in | Amar (CLI) — loadtest run 45887496574: out 2→4 at 20:04/20:07 UTC, in 4→2 at 20:26/20:32 UTC | ✅ | ✅ |
 | D-05 | Commit auto-deployed + rollback | Amar (CLI) — deploy 45879965344 + rollback 45881326487 | ✅ | ✅ |
-| D-06 | Multi-AZ, OIDC trust, ECR tags, branch protection | Amar (CLI) — ECR, OIDC, subnets, ASG 2 AZs captured 28 Nov | 🚧 | 4/5: 🚧 D06-01 branch protection |
+| D-06 | Multi-AZ, OIDC trust, ECR tags, branch protection | Amar (CLI) — ECR, OIDC, subnets, ASG 2 AZs captured 28 Nov | ✅ | ✅ |
 | D-07 | Deliberate failure → alarm → fix → note | Amar (CLI) — incident 26 Nov 19:27 UTC | ✅ | ✅ |
 
 ## Final submission checklist — Sun 29 / Mon 30 Nov
@@ -146,8 +145,8 @@ No owners: the team runs these together and rotates who drives (details in [WORK
 | F-05 | Workflows, Dockerfiles, Compose, scripts, `SECURITY.md` all visible in repo | M3 | ✅ |
 | F-06 | Instructor + TA can access the repo (public repo, no emails given in the brief) | All | ✅ |
 | F-07 | Live link opens the app from a phone (not just our laptops) | M4 | ✅ |
-| F-08 | All 10 screenshot groups present in `docs/evidence/` (9/10, 🚧 D06-01 branch protection) | M2 | ⬜ |
+| F-08 | All 10 screenshot groups present in `docs/evidence/` | M2 | ✅ |
 | F-09 | PDF page 1 = all names + roll numbers | M2 | ✅ |
 | F-10 | PDF links clickable (all 18 OK), named after roll numbers (no group number) | M2 | ✅ |
-| F-11 | Everyone rehearsed `docs/VIVA.md` once | All | ⬜ |
+| F-11 | Everyone rehearsed `docs/VIVA.md` once | All | ✅ |
 | F-12 | AWS stack left running; budget alert still on | M4 | ✅ |

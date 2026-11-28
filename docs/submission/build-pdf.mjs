@@ -131,27 +131,47 @@ const images = readdirSync(evidenceDir)
   .filter((f) => /\.(png|jpe?g)$/i.test(f))
   .sort();
 const groups = [
-  { title: "CI run: each stage a separate job", match: /^D01-/, expect: "D01-01-pipeline-jobs.png" },
+  { title: "CI run with each stage as a separate job", match: /^D01-/, expect: "D01-01-pipeline-jobs.png" },
   { title: "A security stage failed and blocked a PR", match: /^D02-/, expect: "D02-01-snyk-failed.png, D02-02-merge-blocked.png" },
   { title: "Branch protection settings for main", match: /^D06-01-/, expect: "D06-01-branch-protection.png" },
   { title: "ECR with tagged images", match: /^(D06-02-|M2-07-)/, need: /^D06-02-/, expect: "D06-02-ecr-backend-tags.png" },
   { title: "IAM OIDC trust policy", match: /^D06-03-/, expect: "D06-03-oidc-trust-policy.png" },
   { title: "Multi-zone setup", match: /^D06-0[45]-/, expect: "D06-04-subnets.png, D06-05-asg-instances-2-azs.png" },
   { title: "Failure recovery", match: /^D03-/, expect: "D03-01-terminate.png, D03-02-app-still-up.png, D03-03-asg-replaced.png" },
-  { title: "Load test: scale-out and scale-in", match: /^D04-/, expect: "D04-01-k6.png, D04-02-cpu-graph.png, D04-03-asg-activity.png" },
-  { title: "Commit deployed automatically, and a rollback", match: /^D05-/, expect: "D05-01-deploy-run.png, D05-02-version-live.png, D05-03-rollback-run.png" },
+  { title: "Load test with scale out and scale in", match: /^D04-/, expect: "D04-01-k6.png, D04-02-cpu-graph.png, D04-03-asg-activity.png" },
+  { title: "A commit deployed automatically, and a rollback", match: /^D05-/, expect: "D05-01-deploy-run.png, D05-02-version-live.png, D05-03-rollback-run.png" },
   { title: "Monitoring dashboard and a fired alarm", match: /^D07-/, expect: "D07-01-dashboard.png, D07-02-alarm-in-alarm.png, D07-03-sns-email.png" },
-  { title: "Centralized logs (CloudWatch log groups)", match: /^M2-13-/, expect: null },
+  { title: "Centralized logs", match: /^M2-13-/, expect: null },
 ];
 const used = new Set();
-const caption = (f) =>
-  f
-    .replace(/\.(png|jpe?g)$/i, "")
-    .replace(/^(D\d\d|M\d-\d\d)-\d\d-/, "")
-    .replace(/-/g, " ");
+const CAPTIONS = {
+  "D01-01-pipeline-jobs.png": "Pipeline run on main. Every stage is its own job and all of them passed, ending with the push to ECR and the deploy.",
+  "D02-01-snyk-failed.png": "Pull request run where the Snyk dependency scan failed on lodash 4.17.20. The build, image scan, push and deploy jobs were skipped.",
+  "D02-02-merge-blocked.png": "The same pull request. The failed check is required, so merging is blocked.",
+  "D06-01-branch-protection.png": "Ruleset protecting main: pull request with one approval, the nine CI jobs as required checks, no force push and no deletion.",
+  "D06-02-ecr-backend-tags.png": "ECR repositories with immutable tags and scan on push. Each image is tagged with the commit SHA and a version.",
+  "M2-07-01-ecr-repos-console.jpg": "ECR repositories in the AWS console.",
+  "M2-07-02-ecr-logs-cli-verify.jpg": "ECR and log group settings checked from the CLI.",
+  "D06-03-oidc-trust-policy.png": "IAM OIDC provider and the trust policies of the CI and deploy roles. Only the main branch of our repository can assume them.",
+  "D06-04-subnets.png": "Four subnets, one public and one private in each of two Availability Zones, and the load balancer in both zones.",
+  "D06-05-asg-instances-2-azs.png": "Auto Scaling group with one instance in each zone, both healthy behind the load balancer.",
+  "D03-01-instance-kill-recovery.png": "One instance was terminated while the app was in use. The other zone kept serving and the Auto Scaling group launched a replacement.",
+  "D04-01-loadtest-run.png": "k6 load test run in GitHub Actions: 400 virtual users, 4.35 million requests, 0.00 percent failed.",
+  "D04-02-cpu-graph.png": "Average CPU went above the 50 percent target while the request rate peaked.",
+  "D04-03-instance-count.png": "In service instances went from 2 to 4 under load and back to 2 afterwards.",
+  "D04-04-asg-activity-history.png": "Auto Scaling activity history with the target tracking alarms that caused each scale out and scale in.",
+  "D05-01-deploy-run.png": "A push to main deployed automatically: images pushed to ECR, rolling instance refresh, smoke test passed.",
+  "D05-02-version-live.png": "The live health endpoint reporting the deployed version.",
+  "D05-03-rollback-run.png": "Manual rollback workflow taking an image tag as input and redeploying v1.0.15.",
+  "D07-01-dashboard.png": "CloudWatch dashboard taskflow-dashboard: request rate, 5xx errors, latency, target health, CPU and memory, during the incident and the load test.",
+  "D07-02-alarm-5xx-graph.png": "Backend 5xx errors during the deliberate failure, far above the alarm threshold of 10 per minute.",
+  "D07-02-alarm-history.png": "The taskflow-backend-5xx alarm went to ALARM, notified the SNS topic, and returned to OK after the fix.",
+  "M2-13-01-log-groups-console.jpg": "Central CloudWatch log groups for the backend and frontend.",
+};
+const caption = (f) => CAPTIONS[f] || f.replace(/\.(png|jpe?g)$/i, "").replace(/^(D\d\d|M\d-\d\d)-\d\d-/, "").replace(/-/g, " ");
 const img = (f) => {
   used.add(f);
-  return `<figure><img src="${pathToFileURL(join(evidenceDir, f)).href}"><figcaption>${esc(caption(f))} <span class="file">(${esc(f)})</span></figcaption></figure>`;
+  return `<figure><img src="${pathToFileURL(join(evidenceDir, f)).href}"><figcaption>${esc(caption(f))}</figcaption></figure>`;
 };
 const missing = (what) => `<div class="missing">MISSING: ${esc(what)}</div>`;
 const gaps = [];
@@ -178,13 +198,13 @@ const reportPath = join(root, "docs/submission/report.md");
 if (!existsSync(reportPath)) gaps.push("Findings report: docs/submission/report.md");
 
 const repoFiles = [
-  [".github/workflows/pipeline.yml", "CI/CD pipeline, stages 2-12"],
+  [".github/workflows/pipeline.yml", "CI and CD pipeline, stages 2 to 12"],
   [".github/workflows/rollback.yml", "Manual rollback (image tag input)"],
   ["services/backend/Dockerfile", "Backend Dockerfile"],
   ["services/frontend/Dockerfile", "Frontend Dockerfile"],
   ["docker-compose.yml", "Compose, local stack"],
   ["docker-compose.prod.yml", "Compose, production on EC2"],
-  ["scripts/", "Shell scripts (smoke test, deploy, healthcheck, build-and-test)"],
+  ["scripts/", "Shell scripts: smoke test, deploy, health check, build and test"],
   ["SECURITY.md", "Scanners, thresholds, accepted findings"],
   ["infra/README.md", "Rebuild and teardown guide"],
 ];
@@ -192,24 +212,25 @@ const repoFiles = [
 const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(fileBase)} - TaskFlow</title>
 <style>
   @page { size: A4; margin: 16mm 15mm; }
-  body { font: 10.5pt/1.45 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color: #1b1f24; }
-  h1 { font-size: 26pt; margin: 0 0 4pt; } h2 { font-size: 15pt; border-bottom: 1.5pt solid #1b1f24; padding-bottom: 3pt; margin-top: 0; }
-  h3 { font-size: 11.5pt; margin: 12pt 0 5pt; } a { color: #0b57d0; } code { font: 9pt Menlo, Consolas, monospace; background: #f0f2f4; padding: 0 2pt; }
-  table { border-collapse: collapse; width: 100%; margin: 6pt 0 10pt; } th, td { border: 0.6pt solid #b8bec6; padding: 4pt 6pt; text-align: left; vertical-align: top; }
-  th { background: #f0f2f4; } td:nth-child(3), td:first-child { white-space: nowrap; } .page { page-break-after: always; } .cover { padding-top: 40mm; }
-  .sub { font-size: 13pt; color: #4a525c; margin-bottom: 18mm; } .links td:first-child { width: 28%; font-weight: 600; }
-  figure { margin: 6pt 0 12pt; page-break-inside: avoid; } img { max-width: 100%; max-height: 205mm; border: 0.6pt solid #b8bec6; }
-  figcaption { font-size: 9pt; color: #4a525c; margin-top: 2pt; } .file { color: #8a929c; }
-  .shot { page-break-inside: avoid; } .missing { border: 1.5pt dashed #c62828; color: #c62828; padding: 14pt; font-weight: 600; margin: 6pt 0 12pt; }
+  body { font: 10.5pt/1.45 Helvetica, Arial, sans-serif; color: #000; background: #fff; }
+  h1 { font-size: 26pt; margin: 0 0 4pt; } h2 { font-size: 15pt; border-bottom: 1pt solid #000; padding-bottom: 3pt; margin-top: 0; }
+  h3 { font-size: 11.5pt; margin: 12pt 0 5pt; } a { color: #000; text-decoration: underline; } code { font: 9pt Menlo, Consolas, monospace; }
+  table { border-collapse: collapse; width: 100%; margin: 6pt 0 10pt; } th, td { border: 0.6pt solid #000; padding: 4pt 6pt; text-align: left; vertical-align: top; }
+  th { font-weight: bold; } td:nth-child(2) { white-space: nowrap; } .page { page-break-after: always; } .cover { padding-top: 40mm; }
+  .sub { font-size: 13pt; margin-bottom: 18mm; } .links td:first-child { width: 28%; font-weight: bold; }
+  figure { margin: 6pt 0 12pt; page-break-inside: avoid; } img { max-width: 100%; max-height: 205mm; border: 0.6pt solid #000; filter: grayscale(100%); }
+  figcaption { font-size: 9pt; margin-top: 3pt; }
+  .shot { page-break-inside: avoid; } .missing { border: 1.5pt dashed #000; padding: 14pt; font-weight: bold; margin: 6pt 0 12pt; }
+  .arch { page-break-after: always; } .rot { position: relative; height: 250mm; } .rot img { position: absolute; top: 0; left: 168mm; width: 250mm; max-width: none; max-height: none; border: 0; transform: rotate(90deg); transform-origin: top left; }
   .report h2 { font-size: 13pt; border: 0; margin: 8pt 0 3pt; } .report h3 { margin: 8pt 0 2pt; } .report p, .report li { margin: 2pt 0; }
   .report { font-size: 9pt; line-height: 1.3; } .report table { margin: 4pt 0; } .report td, .report th { padding: 2pt 5pt; } tr { page-break-inside: avoid; }
 </style></head><body>
 
 <section class="page cover">
   <h1>TaskFlow</h1>
-  <div class="sub">DevOps final project (CS4067)${hasGroup ? ` · Group ${esc(group)}` : ""} · containerized task tracker on AWS with a 12-stage DevSecOps pipeline</div>
-  <table><thead><tr><th>Member</th><th>Name</th><th>Roll no.</th><th>GitHub</th><th>Area</th></tr></thead><tbody>
-  ${members.map((m) => `<tr><td>${esc(m.id)}</td><td>${esc(m.name)}</td><td>${esc(m.roll)}</td><td><a href="https://github.com/${esc(m.github)}">${esc(m.github)}</a></td><td>${esc(m.area)}</td></tr>`).join("\n")}
+  <div class="sub">DevOps final project (CS4067)${hasGroup ? `, Group ${esc(group)}` : ""}<br>A containerized task tracker on AWS with a twelve stage DevSecOps pipeline</div>
+  <table><thead><tr><th>Name</th><th>Roll no.</th><th>GitHub</th><th>Area</th></tr></thead><tbody>
+  ${members.map((m) => `<tr><td>${esc(m.name)}</td><td>${esc(m.roll)}</td><td><a href="https://github.com/${esc(m.github)}">${esc(m.github)}</a></td><td>${esc(m.area)}</td></tr>`).join("\n")}
   </tbody></table>
   <table class="links"><tbody>
     <tr><td>GitHub repository</td><td><a href="${esc(repoUrl)}">${esc(repoUrl)}</a></td></tr>
@@ -217,9 +238,9 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(file
   </tbody></table>
 </section>
 
-<section class="page">
+<section class="arch">
   <h2>Part 1: Architecture</h2>
-  ${existsSync(diagram) ? `<figure><img src="${pathToFileURL(diagram).href}"></figure>` : missing("docs/submission/architecture.png (M3-14)")}
+  ${existsSync(diagram) ? `<div class="rot"><img src="${pathToFileURL(diagram).href}"></div>` : missing("docs/submission/architecture.png (M3-14)")}
 </section>
 
 <section class="page">
@@ -235,7 +256,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(file
 <section class="page">
   <h2>Part 3: Live link</h2>
   <p style="font-size:14pt">${liveUrl ? `<a href="${esc(liveUrl)}">${esc(liveUrl)}</a>` : missing("live link")}</p>
-  <p>Health: ${liveUrl ? `<a href="${esc(liveUrl)}/health">${esc(liveUrl)}/health</a> · <a href="${esc(liveUrl)}/api/health">${esc(liveUrl)}/api/health</a> (shows the deployed version)` : ""}</p>
+  <p>Health: ${liveUrl ? `<a href="${esc(liveUrl)}/health">${esc(liveUrl)}/health</a> and <a href="${esc(liveUrl)}/api/health">${esc(liveUrl)}/api/health</a> (shows the deployed version)` : ""}</p>
 </section>
 
 <section class="report">
