@@ -1,0 +1,4 @@
+# Trivy ignore list for 10-image-scan (pipeline.yml passes --ignorefile .trivyignore).
+# Empty on purpose: no HIGH/CRITICAL CVE is accepted right now.
+# One CVE ID per line. Every line added here needs a row in SECURITY.md "Accepted findings"
+# (finding, why accepted, when to revisit) in the same PR.
