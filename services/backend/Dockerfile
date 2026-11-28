@@ -4,12 +4,12 @@
 # Stage 1 installs production dependencies only; stage 2 is the runtime image, which has no npm,
 # runs as the non-root "node" user and cannot change its own code (files are owned by root).
 
-FROM node:24.22.3-alpine3.24 AS deps
+FROM node:26.13.1-alpine3.24 AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 
-FROM node:24.22.3-alpine3.24 AS runtime
+FROM node:26.13.1-alpine3.24 AS runtime
 ENV NODE_ENV=production \
     PORT=3000
 WORKDIR /app
