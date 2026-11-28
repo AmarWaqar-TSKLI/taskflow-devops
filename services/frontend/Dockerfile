@@ -11,7 +11,7 @@ RUN npm ci --ignore-scripts && npm cache clean --force
 COPY . .
 RUN npm run build
 
-FROM nginx/nginx-unprivileged:1.30.8-alpine3.24 AS runtime
+FROM nginx/nginx-unprivileged:1.31.10-alpine3.24 AS runtime
 # libxml2 in this base (2.13.9-r3) has HIGH CVEs fixed in 2.13.9-r5 (Trivy, 27 Nov). No newer base tag
 # yet: upgrade just that package, then drop back to the unprivileged user. Remove once the base has it.
 USER root
