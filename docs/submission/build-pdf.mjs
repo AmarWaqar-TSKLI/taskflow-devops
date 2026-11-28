@@ -211,19 +211,23 @@ const repoFiles = [
 
 const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(fileBase)} - TaskFlow</title>
 <style>
-  @page { size: A4; margin: 16mm 15mm; }
+  @page { size: A4; margin: 15mm 15mm 14mm; }
   body { font: 10.5pt/1.45 Helvetica, Arial, sans-serif; color: #000; background: #fff; }
-  h1 { font-size: 26pt; margin: 0 0 4pt; } h2 { font-size: 15pt; border-bottom: 1pt solid #000; padding-bottom: 3pt; margin-top: 0; }
-  h3 { font-size: 11.5pt; margin: 12pt 0 5pt; } a { color: #000; text-decoration: underline; } code { font: 9pt Menlo, Consolas, monospace; }
+  h1 { font-size: 28pt; margin: 0 0 6pt; } h2 { font-size: 15pt; border-bottom: 1pt solid #000; padding-bottom: 3pt; margin: 0 0 8pt; }
+  h3 { font-size: 11.5pt; margin: 14pt 0 4pt; break-after: avoid; page-break-after: avoid; }
+  a { color: #000; text-decoration: underline; } code { font: 9pt Menlo, Consolas, monospace; }
   table { border-collapse: collapse; width: 100%; margin: 6pt 0 10pt; } th, td { border: 0.6pt solid #000; padding: 4pt 6pt; text-align: left; vertical-align: top; }
-  th { font-weight: bold; } td:nth-child(2) { white-space: nowrap; } .page { page-break-after: always; } .cover { padding-top: 40mm; }
-  .sub { font-size: 13pt; margin-bottom: 18mm; } .links td:first-child { width: 28%; font-weight: bold; }
-  figure { margin: 6pt 0 12pt; page-break-inside: avoid; } img { max-width: 100%; max-height: 205mm; border: 0.6pt solid #000; filter: grayscale(100%); }
-  figcaption { font-size: 9pt; margin-top: 3pt; }
-  .shot { page-break-inside: avoid; } .missing { border: 1.5pt dashed #000; padding: 14pt; font-weight: bold; margin: 6pt 0 12pt; }
-  .arch { page-break-after: always; } .rot { position: relative; height: 250mm; } .rot img { position: absolute; top: 0; left: 168mm; width: 250mm; max-width: none; max-height: none; border: 0; transform: rotate(90deg); transform-origin: top left; }
-  .report h2 { font-size: 13pt; border: 0; margin: 8pt 0 3pt; } .report h3 { margin: 8pt 0 2pt; } .report p, .report li { margin: 2pt 0; }
-  .report { font-size: 9pt; line-height: 1.3; } .report table { margin: 4pt 0; } .report td, .report th { padding: 2pt 5pt; } tr { page-break-inside: avoid; }
+  th { font-weight: bold; } .page { break-after: page; page-break-after: always; } .cover { padding-top: 45mm; }
+  .cover td:nth-child(2) { white-space: nowrap; }
+  .sub { font-size: 13pt; margin-bottom: 16mm; } .links td:first-child { width: 28%; font-weight: bold; }
+  figure { margin: 4pt 0 10pt; break-inside: avoid; page-break-inside: avoid; text-align: center; }
+  img { max-width: 100%; max-height: 98mm; border: 0.6pt solid #000; filter: grayscale(100%); }
+  figcaption { font-size: 9pt; margin-top: 3pt; text-align: left; }
+  .missing { border: 1.5pt dashed #000; padding: 14pt; font-weight: bold; margin: 6pt 0 12pt; }
+  .arch img { max-height: 252mm; border: 0; }
+  .report h2 { font-size: 13pt; border: 0; margin: 8pt 0 3pt; } .report h3 { margin: 8pt 0 2pt; } .report p, .report li { margin: 2pt 0 4pt; }
+  .report { font-size: 9.3pt; line-height: 1.33; } .report table { margin: 4pt 0; } .report td, .report th { padding: 2pt 5pt; } tr { break-inside: avoid; }
+  .live { margin-top: 12pt; break-inside: avoid; }
 </style></head><body>
 
 <section class="page cover">
@@ -238,9 +242,9 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(file
   </tbody></table>
 </section>
 
-<section class="arch">
-  <h2>Part 1: Architecture</h2>
-  ${existsSync(diagram) ? `<div class="rot"><img src="${pathToFileURL(diagram).href}"></div>` : missing("docs/submission/architecture.png (M3-14)")}
+<section class="page arch">
+  <h2>Part 1: Architecture diagram</h2>
+  ${existsSync(diagram) ? `<figure><img src="${pathToFileURL(diagram).href}"></figure>` : missing("docs/submission/architecture.png (M3-14)")}
 </section>
 
 <section class="page">
@@ -251,16 +255,17 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(file
   </tbody></table>
   ${evidenceHtml}
   ${extra.length ? `<section class="shot"><h3>Additional evidence</h3>${extra.map(img).join("")}</section>` : ""}
-</section>
-
-<section class="page">
+  <div class="live">
   <h2>Part 3: Live link</h2>
   <p style="font-size:14pt">${liveUrl ? `<a href="${esc(liveUrl)}">${esc(liveUrl)}</a>` : missing("live link")}</p>
   <p>Health: ${liveUrl ? `<a href="${esc(liveUrl)}/health">${esc(liveUrl)}/health</a> and <a href="${esc(liveUrl)}/api/health">${esc(liveUrl)}/api/health</a> (shows the deployed version)` : ""}</p>
+</div>
 </section>
 
+
+
 <section class="report">
-  <h2>Part 4: Findings report</h2>
+  <h2 style="font-size:15pt;border-bottom:1pt solid #000">Part 4: Findings report</h2>
   ${existsSync(reportPath) ? markdown(readFileSync(reportPath, "utf8").replace(/^#\s.*\n/, "")) : missing("docs/submission/report.md")}
 </section>
 </body></html>`;
