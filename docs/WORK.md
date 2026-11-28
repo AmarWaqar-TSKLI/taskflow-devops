@@ -14,7 +14,7 @@ Task IDs here match [PROGRESS.md](PROGRESS.md) and go in your branch names and c
 | **M3** | Shuja | 23L-3024 | @slider79 | CI pipeline, DevSecOps, architecture diagram & report |
 | **M4** | Amar | 23L-3035 | @AmarWaqar-TSKLI | AWS infrastructure, IAM, networking & incident note |
 
-Group number (for `GroupX.pdf`): **____**
+Group number (for `GroupX.pdf`): **____** (we have none: the PDF is named after our roll numbers, `23L-3035_23L-3018_23L-3069_23L-3024.pdf`)
 
 ## Timeline
 

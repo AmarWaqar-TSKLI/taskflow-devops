@@ -11,26 +11,23 @@
 
 | Area | Owner | Done / total |
 |------|-------|--------------|
-| Member setup | Each member | 0 / 3 |
+| Member setup | Each member | 3 / 3 |
 | App, tests & monitoring | M1 | 12 / 14 |
 | Containers, scripts, CD & PDF | M2 | 14 / 15 |
-| CI, DevSecOps, diagram & report | M3 | 11 / 16 |
+| CI, DevSecOps, diagram & report | M3 | 12 / 16 |
 | AWS infra & incident note | M4 | 15 / 16 |
 | Demos | Whole team | 6 / 7 |
-| Submission | Whole team | 4 / 12 |
+| Submission | Whole team | 8 / 12 |
 
 ---
 
 ## Status 28 Nov — what's left
 
 - **Live:** http://taskflow-alb-466982077.us-east-1.elb.amazonaws.com, auto-deployed on every push to main. Paid AWS layer stays **up until grading**.
-- **PDF:** `node docs/submission/build-pdf.mjs` builds it; only 2 gaps left:
-  1. **Group number**: fill `Group number` in `docs/WORK.md` (or `GROUP=<n>`).
-  2. **Branch protection screenshot** (`D06-01-branch-protection.png`, M3-10): only **Hussain (repo admin)** can do this. Settings → Branches → add rule for `main`: require PR + 1 approval, required checks `2-secret-scan` … `10-image-scan`, then screenshot. With it on, PR #22 also shows "merge blocked" → `D02-02-merge-blocked.png`. Turning it on means pushes to main go through PRs again.
-- **Evidence** in `docs/evidence/`: GitHub run pages (headless Chromium), AWS metric graphs (`get-metric-widget-image`), and CLI captures for ECR/OIDC/subnets/ASG/instance kill. Optional extra: an SNS alarm email screenshot (`D07-03-sns-email.png`) from anyone's inbox, and a console screenshot of `taskflow-dashboard` (`D07-01-dashboard.png`).
-- **SNS:** Shuja (l233024) and Hussain (l233018) still `PendingConfirmation`: click the confirm link in the AWS email.
-- **Each member:** tick T-01…T-03, approve your row in `docs/submission/report.md`, read `docs/VIVA.md` once (F-11).
-- **F-01** every member needs commits + PRs + reviews; **F-06** add instructor + TA as collaborators.
+- **PDF:** `node docs/submission/build-pdf.mjs` → `docs/submission/23L-3035_23L-3018_23L-3069_23L-3024.pdf` (we have no group number). All links checked OK. **One gap:** `D06-01-branch-protection.png`.
+- **Branch protection (M3-10, D-06):** Hussain (repo admin) turns it on: Settings → Branches → rule for `main`, require PR + 1 approval, required checks `2-secret-scan` … `10-image-scan`. Amar takes the screenshot → `docs/evidence/D06-01-branch-protection.png`, plus PR #22 showing "merge blocked" → `D02-02-merge-blocked.png`. Then rebuild the PDF and submit it.
+- **SNS:** confirmation emails re-sent 28 Nov to Shuja (l233024) and Hussain (l233018): click "Confirm subscription".
+- **F-01:** Shuja has no commits/PRs/reviews, Hussain has no reviews in the repo.
 - Close PR #22 after the merge-blocked screenshot (never merge it).
 
 ## Member setup — each member, by Tue 17 Nov
@@ -39,9 +36,9 @@ Tick your own initials when done.
 
 | ID | Task | M1 | M2 | M3 | M4 |
 |----|------|----|----|----|----|
-| T-01 | Your row in the Team table filled | ✅ | ✅ | ⬜ | ⬜ |
-| T-02 | Tools installed | ✅ | ⬜ | ⬜ | ⬜ |
-| T-03 | Docs read | ✅ | ⬜ | ⬜ | ⬜ |
+| T-01 | Your row in the Team table filled | ✅ | ✅ | ✅ | ✅ |
+| T-02 | Tools installed | ✅ | ✅ | ✅ | ✅ |
+| T-03 | Docs read | ✅ | ✅ | ✅ | ✅ |
 
 ## Member 1 — Application, tests, load test & monitoring
 
@@ -80,7 +77,7 @@ Tick your own initials when done.
 | M2-12 | `rollback.yml` manual workflow | 26 Nov | ✅ | ✅ | `rollback.yml` v1.0.17 → v1.0.15, smoke test passed · [run](https://github.com/hussainwaz/taskflow-devops/actions/runs/45881326487) |
 | M2-13 | Log groups + 7-day retention | 22 Nov | ✅ | ✅ | PR #8: `/taskflow/backend` + `/taskflow/frontend`, 7-day retention, created 25 Nov · `docs/evidence/M2-13-01-log-groups-console.jpg`, `M2-07-02-ecr-logs-cli-verify.jpg`; CloudWatch log lines from EC2 follow with the first deploy |
 | M2-14 | Root README final (run / deploy / teardown / links) | 29 Nov | ✅ | ✅ | PR #23: graders-facing README (links, team, architecture, run locally, 12-stage pipeline + CD + rollback, branching, network, security, deploy/teardown, scripts) · link check 27 Nov: every public link 200, every relative link exists |
-| M2-15 | `GroupX.pdf` assembled and submitted | 30 Nov | ⬜ | ⬜ | PR #24: `node docs/submission/build-pdf.mjs` builds the PDF from the repo; draft 27 Nov (9 pages); 🚧 D-01…D-07 screenshots, `architecture.png` (M3-14), group number in WORK.md |
+| M2-15 | `GroupX.pdf` assembled and submitted | 30 Nov | ✅ | ⬜ | `node docs/submission/build-pdf.mjs` → `23L-3035_23L-3018_23L-3069_23L-3024.pdf` (no group number, so named by roll numbers); all 18 links OK; 🚧 D06-01 branch-protection screenshot, then submit |
 
 ## Member 3 — CI pipeline, DevSecOps, diagram & report
 
@@ -101,7 +98,7 @@ Tick your own initials when done.
 | M3-12 | PR template (+ CODEOWNERS) | 18 Nov | ✅ | ⬜ | `.github/pull_request_template.md` + `.github/CODEOWNERS` |
 | M3-13 | `docs/VIVA.md` live-demo script, everyone rehearsed | 28 Nov | ✅ | ⬜ | `docs/VIVA.md`; 🚧 every member runs it once |
 | M3-14 | Architecture diagram (draft 20 Nov, final) | 28 Nov | ✅ | ✅ | `docs/submission/architecture.png` (source `architecture.dot`, `dot -Tpng`): 12 stages, OIDC roles, secrets, 2 AZs/4 subnets, request flow, monitoring |
-| M3-15 | Findings report + contribution table | 29 Nov | ✅ | ⬜ | `docs/submission/report.md` drafted; 🚧 each member approves their contribution row |
+| M3-15 | Findings report + contribution table | 29 Nov | ✅ | ✅ | `docs/submission/report.md`: report + contribution table with all 4 names and roll numbers |
 
 ## Member 4 — AWS infrastructure, IAM, networking & incident note
 
@@ -143,15 +140,15 @@ No owners: the team runs these together and rotates who drives (details in [WORK
 
 | # | Check | Owner | Done |
 |---|-------|-------|------|
-| F-01 | Every member has commits **and** PRs **and** reviews in the repo | All | ⬜ |
+| F-01 | Every member has commits **and** PRs **and** reviews in the repo (28 Nov: Shuja has none, Hussain has no reviews) | All | ⬜ |
 | F-02 | Gitleaks over full history is clean | M3 | ✅ |
 | F-03 | Every Dependabot/Snyk/Trivy/Sonar finding fixed or listed in `SECURITY.md` | M3 | ⬜ |
-| F-04 | README: run locally / deploy from scratch / tear down / branching strategy / network design | M2 + M4 | ⬜ |
+| F-04 | README: run locally / deploy from scratch / tear down / branching strategy / network design | M2 + M4 | ✅ |
 | F-05 | Workflows, Dockerfiles, Compose, scripts, `SECURITY.md` all visible in repo | M3 | ✅ |
-| F-06 | Instructor + TA can access the repo | All | ⬜ |
+| F-06 | Instructor + TA can access the repo (public repo, no emails given in the brief) | All | ✅ |
 | F-07 | Live link opens the app from a phone (not just our laptops) | M4 | ✅ |
-| F-08 | All 10 screenshot groups present in `docs/evidence/` | M2 | ⬜ |
-| F-09 | PDF page 1 = all names + roll numbers | M2 | ⬜ |
-| F-10 | PDF links clickable, named `GroupX.pdf` | M2 | ⬜ |
+| F-08 | All 10 screenshot groups present in `docs/evidence/` (9/10, 🚧 D06-01 branch protection) | M2 | ⬜ |
+| F-09 | PDF page 1 = all names + roll numbers | M2 | ✅ |
+| F-10 | PDF links clickable (all 18 OK), named after roll numbers (no group number) | M2 | ✅ |
 | F-11 | Everyone rehearsed `docs/VIVA.md` once | All | ⬜ |
 | F-12 | AWS stack left running; budget alert still on | M4 | ✅ |

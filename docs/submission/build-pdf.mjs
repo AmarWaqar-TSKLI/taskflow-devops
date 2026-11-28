@@ -9,6 +9,7 @@
 // Anything missing becomes a red MISSING box, so a draft can be printed at any time.
 //
 // Usage: node docs/submission/build-pdf.mjs [--check-links]
+//   no group number -> docs/submission/<roll>_<roll>_<roll>_<roll>.pdf (M4, M2, M1, M3)
 //   env GROUP=7        group number (default: WORK.md "Group number", else X) -> docs/submission/Group7.pdf
 //   env CHROME=...     Chrome/Chromium binary (default: macOS Chrome, then google-chrome / chromium on PATH)
 //   --check-links      also request every http(s) link in the PDF and print its status (F-10)
@@ -41,6 +42,14 @@ const members = teamSection
     const [id, name, roll, github, area] = l.split("|").slice(1, 6).map((c) => c.trim().replace(/\*\*/g, ""));
     return { id, name, roll, github: github.replace(/^@/, ""), area };
   });
+
+// We have no group number: the PDF is then named after the members' roll numbers (order: M4, M2, M1, M3),
+// e.g. 23L-3035_23L-3018_23L-3069_23L-3024.pdf, and the cover leaves out "Group X".
+const hasGroup = group !== "X";
+const rollOrder = ["M4", "M2", "M1", "M3"];
+const fileBase = hasGroup
+  ? `Group${group}`
+  : rollOrder.map((id) => (members.find((m) => m.id === id) || {}).roll).filter(Boolean).join("_");
 
 const readme = read("README.md");
 // Row found by a label pattern, so "| Live app |", "| **Live app** |" and "| Live app (ALB URL) |" all work.
@@ -164,7 +173,6 @@ const extra = images.filter((f) => !used.has(f));
 // ---------- the document ----------
 const diagram = join(root, "docs/submission/architecture.png");
 if (!existsSync(diagram)) gaps.push("Architecture diagram: docs/submission/architecture.png (M3-14)");
-if (group === "X") gaps.push("Group number: docs/WORK.md or GROUP=<n>");
 if (!liveUrl) gaps.push("Live link: README links table");
 const reportPath = join(root, "docs/submission/report.md");
 if (!existsSync(reportPath)) gaps.push("Findings report: docs/submission/report.md");
@@ -181,7 +189,7 @@ const repoFiles = [
   ["infra/README.md", "Rebuild and teardown guide"],
 ];
 
-const html = `<!doctype html><html><head><meta charset="utf-8"><title>Group${esc(group)} - TaskFlow</title>
+const html = `<!doctype html><html><head><meta charset="utf-8"><title>${esc(fileBase)} - TaskFlow</title>
 <style>
   @page { size: A4; margin: 16mm 15mm; }
   body { font: 10.5pt/1.45 -apple-system, "Segoe UI", Helvetica, Arial, sans-serif; color: #1b1f24; }
@@ -199,7 +207,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><title>Group${esc
 
 <section class="page cover">
   <h1>TaskFlow</h1>
-  <div class="sub">DevOps final project (CS4067) · Group ${esc(group)} · containerized task tracker on AWS with a 12-stage DevSecOps pipeline</div>
+  <div class="sub">DevOps final project (CS4067)${hasGroup ? ` · Group ${esc(group)}` : ""} · containerized task tracker on AWS with a 12-stage DevSecOps pipeline</div>
   <table><thead><tr><th>Member</th><th>Name</th><th>Roll no.</th><th>GitHub</th><th>Area</th></tr></thead><tbody>
   ${members.map((m) => `<tr><td>${esc(m.id)}</td><td>${esc(m.name)}</td><td>${esc(m.roll)}</td><td><a href="https://github.com/${esc(m.github)}">${esc(m.github)}</a></td><td>${esc(m.area)}</td></tr>`).join("\n")}
   </tbody></table>
@@ -238,9 +246,9 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><title>Group${esc
 
 // ---------- print ----------
 const work_dir = mkdtempSync(join(tmpdir(), "taskflow-pdf-"));
-const htmlFile = join(work_dir, `Group${group}.html`);
+const htmlFile = join(work_dir, `${fileBase}.html`);
 writeFileSync(htmlFile, html);
-const out = join(root, `docs/submission/Group${group}.pdf`);
+const out = join(root, `docs/submission/${fileBase}.pdf`);
 
 const candidates = [
   process.env.CHROME,
