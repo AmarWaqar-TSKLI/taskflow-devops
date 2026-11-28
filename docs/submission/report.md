@@ -1,51 +1,32 @@
-# TaskFlow: findings report
+# TaskFlow findings report
 
-## What we built and learned
-TaskFlow is a small Node/Express + Postgres task app. It runs on AWS behind an Application Load Balancer,
-on an Auto Scaling group that spans two Availability Zones, with RDS in private subnets. Every push to
-`main` goes through an 11-job GitHub Actions pipeline: secret scan → lint → format → Dockerfile lint →
-unit tests → SonarCloud gate → Snyk → image build → Trivy → push to ECR → deploy with smoke test and
-automatic rollback. The biggest lesson was how much of "DevOps" is **making failure safe**, not making
-success fast. That means immutable image tags, scanning the exact image we ship, keeping the previous
-tag ready to redeploy, and alarms that tell us before a user does.
+## What we learned
+
+We built TaskFlow, a small task tracker with a frontend, a backend API and a Postgres database, and ran it on AWS behind a load balancer on an Auto Scaling group in two Availability Zones. Every push goes through a twelve stage GitHub Actions pipeline: secret scan, lint, format check, Dockerfile lint, unit tests, SonarCloud, Snyk, image build, Trivy, push to ECR and deploy with a smoke test. The main lesson was that most of DevOps is about making failure safe. Immutable image tags, scanning the exact image we ship, keeping the previous version ready to redeploy and alarms that reach us before a user does mattered more than the app itself.
 
 ## Main problems and how we solved them
-- **CI could not run on the repo owner's account** (GitHub billing lock). We moved the repo to another
-  member's account. The AWS OIDC trust then broke, because the transferred repo uses GitHub's
-  *immutable* subject claim (`repo:owner@id/repo@id`). We updated the trust policy to that form, which
-  also survives repo renames.
-- **SonarCloud quality gate**: Automatic Analysis clashed with CI analysis. Once that was off, the gate
-  caught real problems: `npm ci` running lifecycle scripts, an unpinned action, and `curl` without HTTPS
-  enforcement. We fixed all of them. The one finding we accepted (HTTP-only ALB, no domain for a
-  certificate) is listed in `SECURITY.md`.
-- **Deploy bug found on the real stack**: SSM Parameter Store rejects `{{ }}` in values, and our prod
-  Compose file had an awslogs `tag: {{.ID}}`. It passed every local test and only failed against AWS.
-- **Killing an instance gave ~20 s of 502s** before the ALB health check (10 s × 2) marked it unhealthy. The
-  ASG replaced it automatically. Terminating through the ASG (which drains first) avoids those errors.
 
-## Post-incident note (D-07)
-We deliberately deleted the security-group rule that lets app instances reach Postgres. `/api/health` stayed
-green, but every task request failed after the 5 s DB connection timeout. The `taskflow-backend-5xx` alarm
-emailed the team after about 4.5 min. The backend's JSON logs ("Connection terminated due to connection
-timeout") pointed at the network path. Re-adding the rule fixed it in 3 s, with no restart. Next time we'd
-add a DB readiness check and drift detection for the security groups.
-Full note: `docs/incidents/2026-11-26-db-unreachable.md`.
+GitHub Actions would not run on the account that first owned the repository because of a billing lock. We moved the repository to another member. After the move the AWS OIDC login failed, because GitHub now sends an immutable subject that includes the owner and repository IDs. We updated the trust policies to that subject.
+
+SonarCloud failed at first because its automatic analysis clashed with our CI analysis. Once that was turned off, the quality gate found real issues: npm install scripts running in CI, an action not pinned to a commit, and downloads without enforced HTTPS. We fixed all of them. The one finding we accepted, the load balancer serving plain HTTP because we have no domain for a certificate, is recorded in SECURITY.md.
+
+Our production Compose file passed every local test but failed on AWS, because SSM Parameter Store rejects values that contain double curly braces. We removed the logging tag that used them.
+
+When an instance was terminated the app returned errors for a few seconds until the load balancer health check marked it unhealthy. The Auto Scaling group replaced it in about two and a half minutes without any action from us.
+
+## Post incident note
+
+We deliberately removed the security group rule that lets the app instances reach the database. The health endpoint stayed green, but every task request failed after the five second connection timeout. The taskflow-backend-5xx alarm went to ALARM and emailed the team about four and a half minutes later. The backend logs showed database connection timeouts, which pointed at the network path. Adding the rule back fixed it within seconds and no restart was needed. Next time we would add a readiness check that tests the database and run our security group script on a schedule to catch drift.
 
 ## Impact on our understanding
-- **Security** is a pipeline property: nine gates run before anything reaches ECR, and the cloud has no
-  long-lived keys (OIDC only), no SSH, and secrets only in Secrets Manager.
-- **Automation** paid off the first time a manual step would have been forgotten. The rollback workflow
-  re-uses the deploy job, so the rollback path gets tested on every deploy.
-- **Reliability** means designing for partial failure: two AZs, min two instances, health checks, and a
-  liveness check that deliberately does not depend on the DB.
-- **Cloud cost**: the paid layer (NAT, ALB, ASG, RDS) was scripted to come up and down in one command, so
-  we only paid for it while testing.
+
+Security is part of the pipeline, not a step at the end: nine checks must pass before anything reaches AWS, and AWS itself has no long lived keys, no SSH and no secrets in the repository. Automation paid off as soon as a manual step would have been forgotten, and because rollback reuses the deploy job it is tested every time we deploy. Reliability meant planning for partial failure with two zones, at least two instances and health checks. On the cloud side we learned to keep costs low by scripting the paid resources so they can be brought up and down with one command.
 
 ## Contributions
 
-| Member | Name | Roll no. | Contributions |
-|--------|------|----------|---------------|
-| M1 | Haseeb | 23L-3069 | Backend + frontend app and tests (TDD, 80 % coverage gate), JSON request logs, k6 load test, CloudWatch agent, dashboard, alarms, SNS |
-| M2 | Hussain | 23L-3018 | Dockerfiles, nginx, Compose (local + prod), healthcheck/smoke-test/deploy scripts, ECR + log groups, push/deploy/rollback workflows |
-| M3 | Shuja | 23L-3024 | CI pipeline jobs 2–10, SonarCloud/Snyk/Dependabot, `SECURITY.md`, architecture diagram, evaluation walkthrough |
-| M4 | Amar | 23L-3035 | AWS account, VPC/subnets/NAT, security groups, IAM + OIDC roles, RDS + Secrets Manager, launch template + user-data, ALB, ASG, infra README, incident note |
+| Name | Roll no. | Contributions |
+|------|----------|---------------|
+| Haseeb | 23L-3069 | Frontend and backend app with tests and an 80 percent coverage gate, JSON request logs, k6 load test, CloudWatch agent, dashboard, alarms and SNS |
+| Hussain Nawaz | 23L-3018 | Dockerfiles, nginx, Compose files for local and production, health check, smoke test and deploy scripts, ECR and log groups, deploy and rollback workflows, final README and PDF |
+| Shuja | 23L-3024 | CI pipeline stages 2 to 10, SonarCloud, Snyk and Dependabot, SECURITY.md, architecture diagram, evaluation walkthrough |
+| Amar | 23L-3035 | AWS account and budget, VPC, subnets and NAT, security groups, IAM and OIDC roles, RDS and Secrets Manager, launch template and user data, load balancer, Auto Scaling group, infra README, incident note |
