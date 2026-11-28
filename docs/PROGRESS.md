@@ -12,26 +12,26 @@
 | Area | Owner | Done / total |
 |------|-------|--------------|
 | Member setup | Each member | 0 / 3 |
-| App, tests & monitoring | M1 | 11 / 14 |
+| App, tests & monitoring | M1 | 12 / 14 |
 | Containers, scripts, CD & PDF | M2 | 14 / 15 |
-| CI, DevSecOps, diagram & report | M3 | 10 / 16 |
-| AWS infra & incident note | M4 | 13 / 16 |
+| CI, DevSecOps, diagram & report | M3 | 11 / 16 |
+| AWS infra & incident note | M4 | 15 / 16 |
 | Demos | Whole team | 6 / 7 |
-| Submission | Whole team | 0 / 12 |
+| Submission | Whole team | 4 / 12 |
 
 ---
 
-## Status 27 Nov — what's left
+## Status 28 Nov — what's left
 
-- **Live:** http://taskflow-alb-466982077.us-east-1.elb.amazonaws.com (v1.0.20, auto-deployed by the pipeline). Paid AWS layer stays **up until grading**.
-- **Screenshots still needed** (D-01…D-07 were run, captured from the CLI; nobody has taken console screenshots yet). Names are in `docs/evidence/README.md`. Run IDs are in the Demos table below.
-- **Branch protection:** removed 26 Nov so everyone can push to main. The brief needs a **screenshot of branch protection** (D-06 / M3-10): Hussain (admin) re-enables it with required checks 2-10, takes the screenshot, and decides whether to keep it on.
-- **D-06** (multi-AZ, OIDC trust policy, ECR tags, branch protection): console screenshots only, everything already exists.
-- **M3-14** architecture diagram → `docs/submission/architecture.png` (not started).
-- **SonarCloud** project is still under Amar's Sonar org and bound to the old repo; main analysis works, PRs are analysed as branches. Optional: re-import under Hussain.
-- **Report** `docs/submission/report.md` drafted: every member checks their row. **PDF** `GroupX.pdf` (M2-15), group number still blank in WORK.md.
-- **Member setup** T-01…T-03 ticks: each member ticks their own.
-- Close PR #22 after its screenshot (it must never be merged).
+- **Live:** http://taskflow-alb-466982077.us-east-1.elb.amazonaws.com, auto-deployed on every push to main. Paid AWS layer stays **up until grading**.
+- **PDF:** `node docs/submission/build-pdf.mjs` builds it; only 2 gaps left:
+  1. **Group number**: fill `Group number` in `docs/WORK.md` (or `GROUP=<n>`).
+  2. **Branch protection screenshot** (`D06-01-branch-protection.png`, M3-10): only **Hussain (repo admin)** can do this. Settings → Branches → add rule for `main`: require PR + 1 approval, required checks `2-secret-scan` … `10-image-scan`, then screenshot. With it on, PR #22 also shows "merge blocked" → `D02-02-merge-blocked.png`. Turning it on means pushes to main go through PRs again.
+- **Evidence** in `docs/evidence/`: GitHub run pages (headless Chromium), AWS metric graphs (`get-metric-widget-image`), and CLI captures for ECR/OIDC/subnets/ASG/instance kill. Optional extra: an SNS alarm email screenshot (`D07-03-sns-email.png`) from anyone's inbox, and a console screenshot of `taskflow-dashboard` (`D07-01-dashboard.png`).
+- **SNS:** Shuja (l233024) and Hussain (l233018) still `PendingConfirmation`: click the confirm link in the AWS email.
+- **Each member:** tick T-01…T-03, approve your row in `docs/submission/report.md`, read `docs/VIVA.md` once (F-11).
+- **F-01** every member needs commits + PRs + reviews; **F-06** add instructor + TA as collaborators.
+- Close PR #22 after the merge-blocked screenshot (never merge it).
 
 ## Member setup — each member, by Tue 17 Nov
 
@@ -56,7 +56,7 @@ Tick your own initials when done.
 | M1-07 | JSON request logging | 22 Nov | ✅ | ✅ | `src/logger.js` emits `{"level","msg","method","path","status","duration_ms"}` JSON lines; unit + container log verified |
 | M1-08 | `APP_VERSION` in health response | 22 Nov | ✅ | ✅ | `GET /api/health` returns `APP_VERSION` (unit tested + container tested with `v1.0.99`) |
 | M1-09 | k6 load test script + README | 25 Nov | ✅ | ✅ | `loadtest.yml` (k6 2.3.0 on Actions): 400 VUs, 4.35 M req @ 4.5 k/s, 0.00 % failed, p95 98 ms, ASG 2→4 · [run](https://github.com/hussainwaz/taskflow-devops/actions/runs/45887496574) |
-| M1-10 | CloudWatch agent config (memory) | 23 Nov | ✅ | ⬜ | `monitoring/cloudwatch-agent.json` uploaded to SSM `/taskflow/prod/cloudwatch-agent` (v1, `627551519533`); 🚧 verify `mem_used_percent` on EC2 boot |
+| M1-10 | CloudWatch agent config (memory) | 23 Nov | ✅ | ✅ | `mem_used_percent` reported by CW agent on every ASG instance (22 metric streams, ~36 % on 28 Nov) |
 | M1-11 | SNS topic + all members subscribed | 23 Nov | ✅ | ⬜ | `taskflow-alerts` created in `627551519533` + all 4 `@lhr.nu.edu.pk` emails subscribed; 🚧 members confirm email + test publish |
 | M1-12 | Dashboard + `monitoring/dashboard.json` | 24 Nov | ✅ | ✅ | `taskflow-dashboard` re-run after `infra/up.sh` (ALB + TG widgets live) · `monitoring/dashboard.json` exported |
 | M1-13 | ≥ 2 alarms, each tested | 24 Nov | ✅ | ✅ | 4 alarms; `taskflow-backend-5xx` fired + cleared in D-07, `unhealthy-*` fired during deploys/instance kill; SNS emails received |
@@ -100,14 +100,14 @@ Tick your own initials when done.
 | M3-11 | `SECURITY.md` | 22 Nov | ✅ | ⬜ | `SECURITY.md`: gates, secrets, hardening, accepted findings |
 | M3-12 | PR template (+ CODEOWNERS) | 18 Nov | ✅ | ⬜ | `.github/pull_request_template.md` + `.github/CODEOWNERS` |
 | M3-13 | `docs/VIVA.md` live-demo script, everyone rehearsed | 28 Nov | ✅ | ⬜ | `docs/VIVA.md`; 🚧 every member runs it once |
-| M3-14 | Architecture diagram (draft 20 Nov, final) | 28 Nov | ⬜ | ⬜ | |
+| M3-14 | Architecture diagram (draft 20 Nov, final) | 28 Nov | ✅ | ✅ | `docs/submission/architecture.png` (source `architecture.dot`, `dot -Tpng`): 12 stages, OIDC roles, secrets, 2 AZs/4 subnets, request flow, monitoring |
 | M3-15 | Findings report + contribution table | 29 Nov | ✅ | ⬜ | `docs/submission/report.md` drafted; 🚧 each member approves their contribution row |
 
 ## Member 4 — AWS infrastructure, IAM, networking & incident note
 
 | ID | Task | Due | Built | Tested | Proof |
 |----|------|-----|-------|--------|-------|
-| M4-00 | AWS budget alert, IAM users + MFA, region us-east-1 | 17 Nov | ✅ | ⬜ | PR #1 (`00-budget.sh`, `00-team-users.sh`); 🚧 members confirm login + MFA |
+| M4-00 | AWS budget alert, IAM users + MFA, region us-east-1 | 17 Nov | ✅ | ✅ | Budget `taskflow-monthly` $25 (spend $4.24 on 28 Nov); 🚧 members confirm their own MFA login |
 | M4-01 | VPC, 4 subnets, IGW, NAT, route tables | 19 Nov | ✅ | ✅ | PR #1 (`01-network.sh`, `nat.sh`); re-run creates nothing; IDs in infra/README §1–2 |
 | M4-02 | Security groups (no SSH) | 19 Nov | ✅ | ✅ | PR #1 (`02-security-groups.sh`); rules in infra/README §3 |
 | M4-03 | GitHub OIDC provider + CI role + deploy role | 20 Nov | ✅ | ✅ | OIDC roles assumed by job 11 (immutable subject `repo:hussainwaz@148036334/taskflow-devops@1460445754`) · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
@@ -118,7 +118,7 @@ Tick your own initials when done.
 | M4-08 | Launch template (IMDSv2, no key pair) | 22 Nov | ✅ | ✅ | `05-launch-template.sh`; test instance: no key, no public IP, IMDSv2 required |
 | M4-09 | ALB + 2 target groups + path routing | 23 Nov | ✅ | ✅ | `06-target-groups.sh`, `alb.sh`; `/`→frontend, `/api/*`→backend, both TGs healthy (infra/README §8–9) |
 | M4-10 | ASG (min 2, 2 AZs, target tracking) | 23 Nov | ✅ | ✅ | 2 AZs, min 2/max 4, CPU 50 % target tracking: scaled 2→4 under load (D-04); instance kill replaced automatically (D-03) |
-| M4-11 | SSM Session Manager works, SSH impossible | 23 Nov | ✅ | ⬜ | SSM Online, no key/no :22; 🚧 console screenshot of a session |
+| M4-11 | SSM Session Manager works, SSH impossible | 23 Nov | ✅ | ✅ | Both instances `Online` in SSM, 0 security-group rules on port 22 (CLI 28 Nov) |
 | M4-12 | Live link in README + `ALB_URL` variable | 23 Nov | ✅ | ✅ | http://taskflow-alb-466982077.us-east-1.elb.amazonaws.com in README + GitHub variable `ALB_URL` |
 | M4-13 | `infra/README.md` complete (rebuild + teardown) | 28 Nov | ✅ | ✅ | `infra/README.md` + root README network design / deploy / teardown (PR #5) |
 | M4-14 | Cost control, everything up until grading | ongoing | ✅ | ⬜ | Paid layer scripted up/down (`infra/up.sh`/`down.sh`); stays up from now until grading |
@@ -131,27 +131,27 @@ No owners: the team runs these together and rotates who drives (details in [WORK
 
 | ID | Demo | Driven by | Done | Screenshots saved |
 |----|------|-----------|------|-------------------|
-| D-01 | CI run, jobs 2–10 separate | Amar (CLI) — pipeline run 45879965344 | ✅ | ⬜ |
-| D-02 | Security stage blocks a PR | Amar (CLI) — PR #22, run 45895734843: `8-dependency-scan` (Snyk, lodash 4.17.20) failed, 9–12 skipped | ✅ | ⬜ |
-| D-03 | Instance terminated → stays up → recovers | Amar (CLI) — instance kill 26 Nov 19:13 UTC | ✅ | ⬜ |
-| D-04 | Load test → scale-out → scale-in | Amar (CLI) — loadtest run 45887496574: out 2→4 at 20:04/20:07 UTC, in 4→2 at 20:26/20:32 UTC | ✅ | ⬜ |
-| D-05 | Commit auto-deployed + rollback | Amar (CLI) — deploy 45879965344 + rollback 45881326487 | ✅ | ⬜ |
-| D-06 | Multi-AZ, OIDC trust, ECR tags, branch protection | | ⬜ | ⬜ |
-| D-07 | Deliberate failure → alarm → fix → note | Amar (CLI) — incident 26 Nov 19:27 UTC | ✅ | ⬜ |
+| D-01 | CI run, jobs 2–10 separate | Amar (CLI) — pipeline run 45879965344 | ✅ | ✅ |
+| D-02 | Security stage blocks a PR | Amar (CLI) — PR #22, run 45895734843: `8-dependency-scan` (Snyk, lodash 4.17.20) failed, 9–12 skipped | ✅ | ✅ D02-01 (🚧 D02-02 merge-blocked needs branch protection) |
+| D-03 | Instance terminated → stays up → recovers | Amar (CLI) — instance kill 26 Nov 19:13 UTC | ✅ | ✅ |
+| D-04 | Load test → scale-out → scale-in | Amar (CLI) — loadtest run 45887496574: out 2→4 at 20:04/20:07 UTC, in 4→2 at 20:26/20:32 UTC | ✅ | ✅ |
+| D-05 | Commit auto-deployed + rollback | Amar (CLI) — deploy 45879965344 + rollback 45881326487 | ✅ | ✅ |
+| D-06 | Multi-AZ, OIDC trust, ECR tags, branch protection | Amar (CLI) — ECR, OIDC, subnets, ASG 2 AZs captured 28 Nov | 🚧 | 4/5: 🚧 D06-01 branch protection |
+| D-07 | Deliberate failure → alarm → fix → note | Amar (CLI) — incident 26 Nov 19:27 UTC | ✅ | ✅ |
 
 ## Final submission checklist — Sun 29 / Mon 30 Nov
 
 | # | Check | Owner | Done |
 |---|-------|-------|------|
 | F-01 | Every member has commits **and** PRs **and** reviews in the repo | All | ⬜ |
-| F-02 | Gitleaks over full history is clean | M3 | ⬜ |
+| F-02 | Gitleaks over full history is clean | M3 | ✅ |
 | F-03 | Every Dependabot/Snyk/Trivy/Sonar finding fixed or listed in `SECURITY.md` | M3 | ⬜ |
 | F-04 | README: run locally / deploy from scratch / tear down / branching strategy / network design | M2 + M4 | ⬜ |
-| F-05 | Workflows, Dockerfiles, Compose, scripts, `SECURITY.md` all visible in repo | M3 | ⬜ |
+| F-05 | Workflows, Dockerfiles, Compose, scripts, `SECURITY.md` all visible in repo | M3 | ✅ |
 | F-06 | Instructor + TA can access the repo | All | ⬜ |
-| F-07 | Live link opens the app from a phone (not just our laptops) | M4 | ⬜ |
+| F-07 | Live link opens the app from a phone (not just our laptops) | M4 | ✅ |
 | F-08 | All 10 screenshot groups present in `docs/evidence/` | M2 | ⬜ |
 | F-09 | PDF page 1 = all names + roll numbers | M2 | ⬜ |
 | F-10 | PDF links clickable, named `GroupX.pdf` | M2 | ⬜ |
 | F-11 | Everyone rehearsed `docs/VIVA.md` once | All | ⬜ |
-| F-12 | AWS stack left running; budget alert still on | M4 | ⬜ |
+| F-12 | AWS stack left running; budget alert still on | M4 | ✅ |

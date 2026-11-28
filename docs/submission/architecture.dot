@@ -1,0 +1,113 @@
+// TaskFlow architecture. Render: dot -Tpng -Gdpi=150 docs/submission/architecture.dot -o docs/submission/architecture.png
+digraph taskflow {
+  graph [rankdir=TB, fontname="Helvetica", fontsize=13, pad=0.4, nodesep=0.35, ranksep=0.55, newrank=true,
+         label="TaskFlow: CI/CD pipeline and AWS architecture (us-east-1, account 627551519533)", labelloc=t, fontsize=20];
+  node  [fontname="Helvetica", fontsize=11, shape=box, style="rounded,filled", fillcolor="#ffffff", color="#555555"];
+  edge  [fontname="Helvetica", fontsize=9, color="#444444"];
+
+  dev [label="Developer\ngit push / PR", shape=oval, fillcolor="#eeeeee"];
+  user [label="Users\n(browser, phone)", shape=oval, fillcolor="#eeeeee"];
+
+  // ---------------- GitHub ----------------
+  subgraph cluster_github {
+    label="GitHub: hussainwaz/taskflow-devops"; style="rounded,filled"; fillcolor="#f3f0ff"; color="#7b61c9"; fontsize=14;
+    s1 [label="1  Code commit\nbranch + PR (Dependabot weekly)"];
+    gsec [label="GitHub Secrets\nSONAR_TOKEN, SNYK_TOKEN\n(no AWS keys)", shape=cylinder, fillcolor="#fff6d6"];
+    subgraph cluster_ci {
+      label="Actions: pipeline.yml (jobs chained with needs:, any failure stops the chain)"; style="rounded,dashed"; color="#7b61c9"; fillcolor="#faf8ff";
+      s2 [label="2  secret-scan\nGitleaks (full history)"];
+      s3 [label="3  lint\nESLint + ShellCheck"];
+      s4 [label="4  format\nPrettier --check"];
+      s5 [label="5  dockerfile-lint\nHadolint"];
+      s6 [label="6  unit-tests\nJest, coverage ≥ 80 %"];
+      s7 [label="7  static-analysis\nSonarCloud quality gate"];
+      s8 [label="8  dependency-scan\nSnyk (high/critical)"];
+      s9 [label="9  build-image\ndocker build + save"];
+      s10 [label="10  image-scan\nTrivy HIGH/CRITICAL"];
+      s11 [label="11  push-image (main only)\nOIDC → taskflow-github-ci-role", fillcolor="#e6f4ea"];
+      s12 [label="12  deploy (main only)\nOIDC → taskflow-github-deploy-role\ndeploy.sh → smoke-test.sh\n→ auto-rollback on failure", fillcolor="#e6f4ea"];
+      rb [label="rollback.yml (manual)\nimage_tag → same deploy", fillcolor="#fde8e8"];
+      s2 -> s3 -> s4 -> s5 -> s6 -> s7 -> s8 -> s9 -> s10 -> s11 -> s12;
+    }
+  }
+  sonar [label="SonarCloud", fillcolor="#eef6ff"];
+  snyk [label="Snyk", fillcolor="#eef6ff"];
+
+  dev -> s1 -> s2;
+  gsec -> s7 [style=dotted, label="token"];
+  gsec -> s8 [style=dotted, label="token"];
+  s7 -> sonar [style=dashed, dir=both];
+  s8 -> snyk [style=dashed, dir=both];
+  rb -> s12 [style=dashed, label="reuses"];
+
+  // ---------------- AWS ----------------
+  subgraph cluster_aws {
+    label="AWS us-east-1"; style="rounded,filled"; fillcolor="#fff8ef"; color="#e8902d"; fontsize=14;
+
+    oidc [label="IAM OIDC provider\ntoken.actions.githubusercontent.com\ntrust: main branch of this repo only", fillcolor="#fff6d6"];
+    ecr [label="ECR\ntaskflow-backend, taskflow-frontend\nimmutable tags (SHA + v1.0.N)\nscan on push", fillcolor="#ffe9cc"];
+    ssm [label="SSM Parameter Store\n/taskflow/prod/image_tag\nprevious_image_tag, compose_file\ncloudwatch-agent config", shape=cylinder, fillcolor="#fff6d6"];
+    sm [label="Secrets Manager\ntaskflow/prod/db\n(RDS-managed password)", shape=cylinder, fillcolor="#fff6d6"];
+
+    subgraph cluster_vpc {
+      label="VPC taskflow-vpc 10.0.0.0/16"; style="rounded,filled"; fillcolor="#ffffff"; color="#2d7be8"; fontsize=13;
+      igw [label="Internet gateway", fillcolor="#eef6ff"];
+
+      subgraph cluster_az_a {
+        label="AZ us-east-1a"; style="rounded,dashed"; color="#2d7be8";
+        pub_a [label="public 10.0.1.0/24\nALB node · NAT gateway", fillcolor="#e8f1ff"];
+        prv_a [label="private 10.0.11.0/24\nEC2 (ASG): nginx :8080\n+ backend :3000 (Docker Compose)\nRDS Postgres 17 primary", fillcolor="#e6f4ea"];
+      }
+      subgraph cluster_az_b {
+        label="AZ us-east-1b"; style="rounded,dashed"; color="#2d7be8";
+        pub_b [label="public 10.0.2.0/24\nALB node", fillcolor="#e8f1ff"];
+        prv_b [label="private 10.0.12.0/24\nEC2 (ASG): nginx :8080\n+ backend :3000\n(RDS subnet group)", fillcolor="#e6f4ea"];
+      }
+
+      alb [label="ALB taskflow-alb  (alb-sg: 80)\n/ → tg-frontend :8080\n/api/* → tg-backend :3000", fillcolor="#dbe9ff"];
+      asg [label="Auto Scaling group taskflow-asg\nmin 2 / max 4, 2 AZs, ELB health checks\ntarget tracking CPU 50 %\nlaunch template: AL2023, IMDSv2, no SSH key\napp-sg: 8080/3000 from alb-sg only", fillcolor="#e6f4ea"];
+      rds [label="RDS taskflow-db\nPostgres 17, encrypted, not public\ndb-sg: 5432 from app-sg only, TLS", shape=cylinder, fillcolor="#e6f4ea"];
+    }
+
+    subgraph cluster_mon {
+      label="Monitoring & logging"; style="rounded,filled"; fillcolor="#f1fbf4"; color="#2e9e5b";
+      cwl [label="CloudWatch Logs\n/taskflow/backend, /taskflow/frontend\n(awslogs driver, JSON request logs, 7 days)"];
+      cwm [label="CloudWatch metrics\nALB, target groups, ASG CPU\nCW agent: mem_used_percent"];
+      dash [label="Dashboard taskflow-dashboard"];
+      alarms [label="Alarms: unhealthy-frontend,\nunhealthy-backend, backend-5xx, high-cpu"];
+      sns [label="SNS taskflow-alerts\n→ email to all 4 members"];
+      cwm -> dash; cwm -> alarms -> sns;
+    }
+    budget [label="AWS Budgets\nmonthly cost alert", fillcolor="#fde8e8"];
+    ssmsm [label="SSM Session Manager\n(shell access, no port 22)", fillcolor="#fff6d6"];
+  }
+
+  // request flow
+  user -> igw [label="HTTP", color="#2d7be8", penwidth=2];
+  igw -> alb [color="#2d7be8", penwidth=2];
+  alb -> pub_a [style=invis]; alb -> pub_b [style=invis];
+  alb -> asg [label="frontend + /api", color="#2d7be8", penwidth=2];
+  asg -> prv_a [style=dashed, arrowhead=none]; asg -> prv_b [style=dashed, arrowhead=none];
+  asg -> rds [label="5432 (TLS)", color="#2d7be8", penwidth=2];
+  prv_a -> pub_a [label="outbound via NAT\n(ECR, SSM, CloudWatch)", style=dotted];
+
+  // delivery flow
+  s11 -> oidc [label="AssumeRoleWithWebIdentity", color="#2e9e5b"];
+  s12 -> oidc [color="#2e9e5b"];
+  s11 -> ecr [label="push scanned images", color="#2e9e5b", penwidth=2];
+  s12 -> ssm [label="set image_tag", color="#2e9e5b", penwidth=2];
+  s12 -> asg [label="instance refresh", color="#2e9e5b", penwidth=2];
+  s12 -> alb [label="smoke test", style=dashed, color="#2e9e5b"];
+
+  // instance boot
+  ssm -> asg [label="user-data reads\ntag + compose", style=dashed];
+  sm -> asg [label="DB creds at boot\n(EC2 role)", style=dashed];
+  ecr -> asg [label="docker pull", style=dashed];
+
+  // monitoring
+  asg -> cwl [style=dashed, color="#2e9e5b"];
+  asg -> cwm [style=dashed, color="#2e9e5b"];
+  alb -> cwm [style=dashed, color="#2e9e5b"];
+  alarms -> asg [label="CPU target tracking\nscale out / in", style=dotted, color="#2e9e5b"];
+  ssmsm -> asg [style=dotted];
+}
