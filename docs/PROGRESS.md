@@ -27,7 +27,6 @@
 - **PDF:** `node docs/submission/build-pdf.mjs` → `docs/submission/23L-3035_23L-3018_23L-3069_23L-3024.pdf` (we have no group number). All links checked OK. **One gap:** `D06-01-branch-protection.png`.
 - **Branch protection (M3-10, D-06):** Hussain (repo admin) turns it on: Settings → Branches → rule for `main`, require PR + 1 approval, required checks `2-secret-scan` … `10-image-scan`. Amar takes the screenshot → `docs/evidence/D06-01-branch-protection.png`, plus PR #22 showing "merge blocked" → `D02-02-merge-blocked.png`. Then rebuild the PDF and submit it.
 - **SNS:** confirmation emails re-sent 28 Nov to Shuja (l233024) and Hussain (l233018): click "Confirm subscription".
-- **F-01:** Shuja has no commits/PRs/reviews, Hussain has no reviews in the repo.
 - Close PR #22 after the merge-blocked screenshot (never merge it).
 
 ## Member setup — each member, by Tue 17 Nov
@@ -140,7 +139,7 @@ No owners: the team runs these together and rotates who drives (details in [WORK
 
 | # | Check | Owner | Done |
 |---|-------|-------|------|
-| F-01 | Every member has commits **and** PRs **and** reviews in the repo (28 Nov: Shuja has none, Hussain has no reviews) | All | ⬜ |
+| F-01 | Every member has commits **and** PRs **and** reviews in the repo | All | ⬜ |
 | F-02 | Gitleaks over full history is clean | M3 | ✅ |
 | F-03 | Every Dependabot/Snyk/Trivy/Sonar finding fixed or listed in `SECURITY.md` | M3 | ⬜ |
 | F-04 | README: run locally / deploy from scratch / tear down / branching strategy / network design | M2 + M4 | ✅ |
