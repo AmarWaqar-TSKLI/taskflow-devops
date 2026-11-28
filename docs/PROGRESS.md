@@ -14,10 +14,10 @@
 | Member setup | Each member | 3 / 3 |
 | App, tests & monitoring | M1 | 12 / 14 |
 | Containers, scripts, CD & PDF | M2 | 15 / 15 |
-| CI, DevSecOps, diagram & report | M3 | 13 / 16 |
+| CI, DevSecOps, diagram & report | M3 | 15 / 16 |
 | AWS infra & incident note | M4 | 15 / 16 |
 | Demos | Whole team | 7 / 7 |
-| Submission | Whole team | 10 / 12 |
+| Submission | Whole team | 11 / 12 |
 
 ---
 
@@ -87,13 +87,13 @@ Tick your own initials when done.
 | M3-03 | `3-lint` (ESLint + ShellCheck), `4-format` (Prettier) | 19 Nov | ✅ | ✅ | ESLint ×2 + ShellCheck on scripts/, infra/, monitoring/ · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
 | M3-04 | `5-dockerfile-lint` Hadolint | 19 Nov | ✅ | ✅ | Hadolint v2.14.0, `--failure-threshold warning` · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
 | M3-05 | `6-unit-tests` Jest + coverage | 20 Nov | ✅ | ✅ | Jest ×2, coverage ≥ 80 % enforced, `coverage` artifact · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
-| M3-06 | `7-static-analysis` SonarCloud + quality gate | 20 Nov | ✅ | ✅ | SonarCloud CI scan, `sonar.qualitygate.wait=true`, gate passed · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
+| M3-06 | `7-static-analysis` SonarCloud + quality gate | 20 Nov | ✅ | ✅ | SonarCloud CI scan, `sonar.qualitygate.wait=true`, gate passed · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) · scan action bumped to v8.5.1 from a team branch (Dependabot #21 can't pass, its runs get no `SONAR_TOKEN`) |
 | M3-07 | `8-dependency-scan` Snyk + `dependabot.yml` | 21 Nov | ✅ | ✅ | Snyk 1.1308.4 `--severity-threshold=high` ×2 + `.github/dependabot.yml` (npm ×2, docker ×2, actions) · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
 | M3-08 | `9-build-image` + image artifacts | 21 Nov | ✅ | ✅ | `docker save` → `images` artifact, pushed unchanged by job 11 · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
 | M3-09 | `10-image-scan` Trivy HIGH/CRITICAL | 21 Nov | ✅ | ✅ | Trivy 0.76.2 HIGH/CRITICAL, `--exit-code 1`, 0 findings · [run 45877781053](https://github.com/hussainwaz/taskflow-devops/actions/runs/45877781053) |
 | M3-10 | Branch protection with all required checks | 22 Nov | ✅ | ✅ | Ruleset `protection` on `main`: PR + 1 approval, checks 2–10 required, no force-push/deletion · `D06-01-branch-protection.png` |
-| M3-11 | `SECURITY.md` | 22 Nov | ✅ | ⬜ | `SECURITY.md`: gates, secrets, hardening, accepted findings |
-| M3-12 | PR template (+ CODEOWNERS) | 18 Nov | ✅ | ⬜ | `.github/pull_request_template.md` + `.github/CODEOWNERS` |
+| M3-11 | `SECURITY.md` | 22 Nov | ✅ | ✅ | `SECURITY.md`: gates, secrets, hardening, branch protection, Dependabot decisions, 28 Nov scan results, accepted findings · linked from README (Pipeline + Security sections) · findings re-checked 28 Nov (Trivy incl. unfixed, npm audit, SonarCloud API, Dependabot alerts) |
+| M3-12 | PR template (+ CODEOWNERS) | 18 Nov | ✅ | ✅ | `.github/pull_request_template.md` filled in automatically on PRs #29, #30 · `.github/CODEOWNERS` now also names owners for M2's deploy/rollback workflows, the submission folder and M3's files |
 | M3-13 | `docs/VIVA.md` live-demo script, everyone rehearsed | 28 Nov | ✅ | ⬜ | `docs/VIVA.md`: demo change now goes branch → PR → approval (direct push to protected `main` is rejected), stage-by-stage gate table, rehearsal log; 🚧 every member adds a row to the rehearsal log |
 | M3-14 | Architecture diagram (draft 20 Nov, final) | 28 Nov | ✅ | ✅ | `docs/submission/architecture.png` (source `architecture.dot`, `dot -Tpng`): 12 stages, OIDC roles, secrets, 2 AZs/4 subnets, request flow, monitoring |
 | M3-15 | Findings report + contribution table | 29 Nov | ✅ | ✅ | `docs/submission/report.md`: report + contribution table with all 4 names and roll numbers |
@@ -140,7 +140,7 @@ No owners: the team runs these together and rotates who drives (details in [WORK
 |---|-------|-------|------|
 | F-01 | Every member has commits **and** PRs **and** reviews in the repo | All | ⬜ |
 | F-02 | Gitleaks over full history is clean | M3 | ✅ |
-| F-03 | Every Dependabot/Snyk/Trivy/Sonar finding fixed or listed in `SECURITY.md` | M3 | ⬜ |
+| F-03 | Every Dependabot/Snyk/Trivy/Sonar finding fixed or listed in `SECURITY.md` | M3 | ✅ |
 | F-04 | README: run locally / deploy from scratch / tear down / branching strategy / network design | M2 + M4 | ✅ |
 | F-05 | Workflows, Dockerfiles, Compose, scripts, `SECURITY.md` all visible in repo | M3 | ✅ |
 | F-06 | Instructor + TA can access the repo (public repo, no emails given in the brief) | All | ✅ |
